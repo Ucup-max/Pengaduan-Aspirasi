@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Pengaduan dan Aspirasi - Help Desk Ticket</title>
+
+  <!-- 1. Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <!-- 2. Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- 3. Supabase JS SDK v2 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body
+  class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Top Announcement / Mode Banner -->
+  <div id="connectionBanner"
+    class="bg-amber-500 text-white text-xs font-medium py-2 px-4 shadow-sm transition-all duration-300">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="flex h-2 w-2 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-200 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+        </span>
+        <span id="bannerText"><strong>Mode Demo Lokal Aktif:</strong> Data tersimpan di <code>localStorage</code>
+          browser. Untuk menghubungkan ke Cloud Supabase, ganti <code>SUPABASE_URL</code> dan
+          <code>SUPABASE_ANON_KEY</code> di dalam file <code>index.html</code>.</span>
+      </div>
+      <button onclick="toggleConfigModal()"
+        class="text-xs bg-amber-600 hover:bg-amber-700 px-2.5 py-1 rounded text-white font-semibold transition shrink-0">
+        Panduan Supabase
+      </button>
+    </div>
+  </div>
+
+  <!-- Header Navigation Bar (Sesuai Penpot Design) -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white shadow-sm shadow-indigo-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-bold text-slate-900 leading-tight">Pengaduan &amp; Aspirasi</h1>
+            <span
+              class="hidden md:inline-flex text-[11px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">Help
+              Desk Ticket</span>
+          </div>
+          <p class="text-xs text-slate-500">Layanan Publik Resmi &amp; Penanganan Kendala Terpadu</p>
+        </div>
+      </div>
+
+      <!-- Right Header Actions & Live Status Badge -->
+      <div class="flex items-center gap-3">
+        <div id="statusBadge"
+          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 transition-all">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          <span id="statusBadgeText">Local Demo Mode</span>
+        </div>
+        <button onclick="window.location.reload()" title="Refresh Data"
+          class="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Workspace -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
+
+    <!-- 3 Summary / KPI Cards (Top Metrics Sesuai SKPL & Penpot) -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <!-- Card 1: Total Tiket Masuk -->
+      <div
+        class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex items-center justify-between hover:border-slate-300 transition">
+        <div>
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Laporan Masuk</p>
+          <h3 id="statTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">0</h3>
+          <p class="text-xs text-indigo-600 font-medium mt-1">Seluruh tiket terdaftar</p>
+        </div>
+        <div
+          class="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 2: Tiket Dalam Penanganan (Pending & Diproses) -->
+      <div
+        class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex items-center justify-between hover:border-slate-300 transition">
+        <div>
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Dalam Penanganan</p>
+          <h3 id="statProses" class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">0</h3>
+          <p class="text-xs text-amber-600 font-medium mt-1">Status: Pending &amp; Diproses</p>
+        </div>
+        <div
+          class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Card 3: Tiket Selesai -->
+      <div
+        class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex items-center justify-between hover:border-slate-300 transition">
+        <div>
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Laporan Selesai</p>
+          <h3 id="statSelesai" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">0</h3>
+          <p class="text-xs text-emerald-600 font-medium mt-1">Telah diselesaikan petugas</p>
+        </div>
+        <div
+          class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Panel Simulasi Pengujian 1-Klik (QA & Security Helper Bar) -->
+    <section class="bg-indigo-50/70 border border-indigo-200/80 rounded-xl p-4">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <span
+            class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-indigo-600 text-white text-xs font-bold">QA</span>
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-900">Panel Uji Cepat SKPL (QA &amp;
+              Security Mode)</h4>
+            <p class="text-xs text-indigo-700">Verifikasi otomatis skenario Black Box Testing &amp; ketahanan Anti-XSS
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+          <!-- Tombol Uji TC-01 -->
+          <button id="btnUjiTC01" onclick="runTestTC01()"
+            class="flex-1 sm:flex-none text-xs bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 font-semibold px-3 py-2 rounded-lg transition shadow-2xs flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            [Uji TC-01 (Submit Deskripsi Kosong)]
+          </button>
+          <!-- Tombol Uji TC-02 -->
+          <button id="btnUjiTC02" onclick="runTestTC02()"
+            class="flex-1 sm:flex-none text-xs bg-white hover:bg-blue-50 text-blue-700 border border-blue-300 font-semibold px-3 py-2 rounded-lg transition shadow-2xs flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            [Uji TC-02 (Update Status Diproses)]
+          </button>
+          <!-- Tombol Uji SEC-01 -->
+          <button id="btnUjiSEC01" onclick="runTestSEC01()"
+            class="flex-1 sm:flex-none text-xs bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 font-semibold px-3 py-2 rounded-lg transition shadow-2xs flex items-center justify-center gap-1.5">
+            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            [Uji SEC-01 (Payload Anti-XSS)]
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Split Layout (2 Kolom Responsif Sesuai DESIGN.md & Penpot) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+      <!-- ================= KOLOM KIRI: FORM INPUT PENGADUAN (5 Kolom) ================= -->
+      <div class="lg:col-span-5 bg-white rounded-xl border border-slate-200 shadow-xs p-6 sticky top-24">
+
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div>
+            <h2 id="formTitle" class="text-base font-bold text-slate-900">Buat Pengaduan</h2>
+            <p id="formSubtitle" class="text-xs text-slate-500">Isi detail kendala atau aspirasi. Nomor tiket
+              diterbitkan otomatis.</p>
+          </div>
+          <span id="formModeBadge"
+            class="text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full">Mode
+            Input</span>
+        </div>
+
+        <!-- Dynamic Alert Error Box (TC-01 Validation Failure Target) -->
+        <div id="errorAlertBox"
+          class="hidden mt-4 p-3.5 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs flex items-start gap-2.5 transition-all">
+          <svg class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div class="flex-1">
+            <strong class="font-semibold block">Validasi Ditolak:</strong>
+            <span id="errorMessageText">Deskripsi wajib diisi</span>
+          </div>
+          <button onclick="hideErrorAlert()"
+            class="text-rose-500 hover:text-rose-800 text-sm leading-none">&times;</button>
+        </div>
+
+        <!-- Dynamic Success Alert Box -->
+        <div id="successAlertBox"
+          class="hidden mt-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 text-xs flex items-start gap-2.5 transition-all">
+          <svg class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <div class="flex-1">
+            <strong class="font-semibold block">Berhasil!</strong>
+            <span id="successMessageText">Data tiket berhasil disimpan.</span>
+          </div>
+          <button onclick="hideSuccessAlert()"
+            class="text-emerald-500 hover:text-emerald-800 text-sm leading-none">&times;</button>
+        </div>
+
+        <!-- Form Tiket Pengaduan (Tanpa atribut required/min di HTML agar bisa dites Black Box) -->
+        <form id="ticketForm" onsubmit="handleFormSubmit(event)" class="mt-5 space-y-4" novalidate>
+          <input type="hidden" id="editRecordId" value="">
+
+          <!-- Field 1: Nomor Tiket (Read-only / Preview Auto-Generated) -->
+          <div>
+            <label for="nomor_tiket" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              Nomor Tiket <span class="text-slate-400 font-normal lowercase">(otomatis)</span>
+            </label>
+            <div class="relative">
+              <input type="text" id="nomor_tiket" name="nomor_tiket" readonly
+                class="w-full bg-slate-100 border border-slate-200 text-slate-600 text-sm font-mono rounded-lg px-3.5 py-2.5 cursor-not-allowed select-all focus:outline-none"
+                placeholder="ADU-2026-0001">
+              <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-mono">AUTO</span>
+            </div>
+          </div>
+
+          <!-- Field 2: Nama Pelapor -->
+          <div>
+            <label for="nama_pelapor" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              Nama Pelapor <span class="text-rose-500">*</span>
+            </label>
+            <input type="text" id="nama_pelapor" name="nama_pelapor"
+              class="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-lg px-3.5 py-2.5 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition focus:outline-none"
+              placeholder="Contoh: Rina Maharani">
+          </div>
+
+          <!-- Field 3: Kategori -->
+          <div>
+            <label for="kategori" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              Kategori Pengaduan <span class="text-rose-500">*</span>
+            </label>
+            <select id="kategori" name="kategori"
+              class="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-lg px-3.5 py-2.5 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition focus:outline-none">
+              <option value="Kendala Teknis">Kendala Teknis</option>
+              <option value="Layanan Publik">Layanan Publik</option>
+              <option value="Sarana & Prasarana">Sarana &amp; Prasarana</option>
+              <option value="Aspirasi & Masukan">Aspirasi &amp; Masukan</option>
+            </select>
+          </div>
+
+          <!-- Field 4: Deskripsi (TARGET TC-01: Tidak memakai required/min di HTML) -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label for="deskripsi" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                Deskripsi Laporan <span class="text-rose-500">*</span>
+              </label>
+              <span class="text-[11px] text-slate-400">Wajib diisi detail</span>
+            </div>
+            <!-- Catatan: Jangan tambahkan atribut required/min di tag textarea di bawah ini -->
+            <textarea id="deskripsi" name="deskripsi" rows="4"
+              class="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-lg p-3.5 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition focus:outline-none resize-y"
+              placeholder="Tuliskan kronologi, kendala, atau aspirasi Anda secara lengkap..."></textarea>
+          </div>
+
+          <!-- Field 5: Status Penanganan Tiket -->
+          <div>
+            <label for="status" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              Status Penanganan
+            </label>
+            <select id="status" name="status"
+              class="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-lg px-3.5 py-2.5 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition focus:outline-none">
+              <option value="Pending">Pending (Menunggu Antrean)</option>
+              <option value="Diproses">Diproses (Sedang Dikerjakan)</option>
+              <option value="Selesai">Selesai (Penanganan Tuntas)</option>
+            </select>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="pt-2 flex flex-col sm:flex-row items-center gap-2.5">
+            <button type="submit" id="btnSubmit"
+              class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-2.5 px-4 rounded-lg shadow-sm shadow-indigo-200 transition flex items-center justify-center gap-2 cursor-pointer">
+              <svg id="submitSpinner" class="hidden w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                </path>
+              </svg>
+              <span id="btnSubmitText">Kirim Pengaduan</span>
+            </button>
+            <button type="button" id="btnCancelEdit" onclick="cancelEditMode()"
+              class="hidden w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm py-2.5 px-4 rounded-lg transition text-center cursor-pointer">
+              Batal
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ================= KOLOM KANAN: TABEL DATA, PENCARIAN & FILTER (7 Kolom) ================= -->
+      <div class="lg:col-span-7 space-y-4">
+
+        <!-- Controls: Search Bar & Filters -->
+        <div
+          class="bg-white rounded-xl border border-slate-200 shadow-xs p-4 flex flex-col sm:flex-row items-center gap-3">
+          <!-- Search Box -->
+          <div class="relative flex-1 w-full">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+            <input type="text" id="searchInput" oninput="applyFilters()"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-600 focus:outline-none transition"
+              placeholder="Cari nomor tiket, pelapor, atau deskripsi...">
+          </div>
+
+          <!-- Status Filter Dropdown -->
+          <div class="w-full sm:w-44">
+            <select id="filterStatus" onchange="applyFilters()"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:bg-white focus:border-indigo-600 focus:outline-none transition">
+              <option value="ALL">Semua Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Diproses">Diproses</option>
+              <option value="Selesai">Selesai</option>
+            </select>
+          </div>
+
+          <!-- Category Filter Dropdown -->
+          <div class="w-full sm:w-44">
+            <select id="filterKategori" onchange="applyFilters()"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:bg-white focus:border-indigo-600 focus:outline-none transition">
+              <option value="ALL">Semua Kategori</option>
+              <option value="Kendala Teknis">Kendala Teknis</option>
+              <option value="Layanan Publik">Layanan Publik</option>
+              <option value="Sarana & Prasarana">Sarana &amp; Prasarana</option>
+              <option value="Aspirasi & Masukan">Aspirasi &amp; Masukan</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">Riwayat Pengaduan &amp; Tiket</h3>
+              <p class="text-xs text-slate-500">Daftar laporan aduan yang tercatat pada sistem</p>
+            </div>
+            <span id="tableRecordCount"
+              class="text-xs font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md">0 Laporan</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr
+                  class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th class="px-4 py-3">No. Tiket</th>
+                  <th class="px-4 py-3">Pelapor</th>
+                  <th class="px-4 py-3">Kategori</th>
+                  <th class="px-4 py-3">Deskripsi Aduan</th>
+                  <th class="px-4 py-3">Status</th>
+                  <th class="px-4 py-3 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="ticketTableBody" class="divide-y divide-slate-100 text-xs">
+                <!-- Baris tabel dirender secara aman (Anti-XSS textContent) via createSafeTransactionRow -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State (Jika tidak ada data) -->
+          <div id="emptyState" class="hidden p-10 text-center">
+            <div
+              class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-3">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
+            </div>
+            <h4 class="text-sm font-semibold text-slate-700">Belum ada tiket pengaduan</h4>
+            <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Silakan buat pengaduan baru melalui formulir di
+              samping kiri atau sesuaikan filter pencarian.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Bantuan Konfigurasi Supabase -->
+  <div id="configModal"
+    class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-sm font-bold text-slate-900">Panduan Menghubungkan Supabase Cloud</h3>
+        <button onclick="toggleConfigModal()"
+          class="text-slate-400 hover:text-slate-600 text-xl font-bold leading-none">&times;</button>
+      </div>
+      <div class="mt-4 space-y-3 text-xs text-slate-600 leading-relaxed">
+        <p>1. Buka <strong>Supabase Dashboard</strong> Anda di <a href="https://supabase.com/dashboard" target="_blank"
+            class="text-indigo-600 underline">supabase.com</a>.</p>
+        <p>2. Jalankan seluruh perintah SQL di berkas <code>supabase_schema.sql</code> melalui menu <strong>SQL
+            Editor</strong> Supabase.</p>
+        <p>3. Salin <strong>Project URL</strong> dan <strong>Anon Public Key</strong> dari menu <em>Project Settings
+            &gt; API</em>.</p>
+        <p>4. Buka berkas <code>index.html</code> ini, lalu ganti nilai variabel pada baris script:</p>
+        <div class="bg-slate-900 text-emerald-400 p-3 rounded-lg font-mono text-[11px] overflow-x-auto">
+          const SUPABASE_URL = 'https://hbekdutsineitvrghcui.supabase.co';<br>
+          const SUPABASE_ANON_KEY = 'sb_publishable_npHOglpUjq9kS9--oy6Teg_Iqbb9-bn';
+        </div>
+        <p class="text-slate-500 italic">*Jangan pernah memasukkan <code>service_role</code> secret key di kode frontend
+          browser.</p>
+      </div>
+      <div class="mt-5 text-right">
+        <button onclick="toggleConfigModal()"
+          class="bg-indigo-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400">
+      Workshop JKB X PERMIKOMNAS &bull; Sistem Pengaduan dan Aspirasi (Help Desk Ticket) &bull; SKPL Implementation
+    </div>
+  </footer>
+
+  <!-- =================================================================== -->
+  <!-- JAVASCRIPT LOGIC & SUPABASE CLIENT INTEGRATION                       -->
+  <!-- =================================================================== -->
+  <script>
+    // -------------------------------------------------------------------
+    // 1. KONFIGURASI KONEKSI SUPABASE & DETEKSI MODE FALLBACK CERDAS
+    // -------------------------------------------------------------------
+    const SUPABASE_URL = 'https://hbekdutsineitvrghcui.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_npHOglpUjq9kS9--oy6Teg_Iqbb9-bn';
+
+    // Cek apakah URL Supabase valid (bukan placeholder template)
+    const isCloudSupabase = SUPABASE_URL &&
+      SUPABASE_URL.startsWith('https://') &&
+      SUPABASE_URL.includes('.supabase.co') &&
+      !SUPABASE_URL.includes('GANTI_DENGAN');
+
+    let supabaseClient = null;
+    if (isCloudSupabase && window.supabase) {
+      try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } catch (err) {
+        console.error('Gagal menginisialisasi Supabase Client:', err);
+      }
+    }
+
+    // Inisialisasi Data Demo Awal (Sesuai Penpot & supabase_schema.sql)
+    const SEED_DATA = [
+      {
+        id: 1,
+        nomor_tiket: 'ADU-2026-0001',
+        nama_pelapor: 'Ahmad Fauzi',
+        kategori: 'Kendala Teknis',
+        deskripsi: 'Tidak dapat mengakses portal sistem informasi akademik saat mengunggah berkas registrasi.',
+        status: 'Pending',
+        created_at: new Date(Date.now() - 3600000 * 3).toISOString()
+      },
+      {
+        id: 2,
+        nomor_tiket: 'ADU-2026-0002',
+        nama_pelapor: 'Siti Nurhaliza',
+        kategori: 'Sarana & Prasarana',
+        deskripsi: 'Koneksi Wi-Fi di lantai 3 Gedung Workshop sering putus-putus dan butuh reset access point.',
+        status: 'Diproses',
+        created_at: new Date(Date.now() - 86400000 * 1).toISOString()
+      },
+      {
+        id: 3,
+        nomor_tiket: 'ADU-2026-0003',
+        nama_pelapor: 'Budi Hartono',
+        kategori: 'Layanan Publik',
+        deskripsi: 'Permohonan legalisir dokumen sertifikat pelatihan telah diverifikasi dan siap diambil di loket.',
+        status: 'Selesai',
+        created_at: new Date(Date.now() - 86400000 * 2).toISOString()
+      }
+    ];
+
+    // State Aplikasi
+    let allTickets = [];
+    let isEditing = false;
+
+    // -------------------------------------------------------------------
+    // 2. FUNGSI PERSISTENSI DATA (SUPABASE vs LOCAL STORAGE FALLBACK)
+    // -------------------------------------------------------------------
+    function getLocalData() {
+      const stored = localStorage.getItem('tickets_data');
+      if (!stored) {
+        localStorage.setItem('tickets_data', JSON.stringify(SEED_DATA));
+        return [...SEED_DATA];
+      }
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        return [...SEED_DATA];
+      }
+    }
+
+    function saveLocalData(data) {
+      localStorage.setItem('tickets_data', JSON.stringify(data));
+    }
+
+    // Mengambil data tiket (Read / SELECT)
+    async function fetchTickets() {
+      setSubmitLoading(true);
+      try {
+        if (supabaseClient) {
+          const { data, error } = await supabaseClient
+            .from('tickets')
+            .select('*')
+            .order('id', { ascending: false });
+
+          if (error) throw error;
+          allTickets = data || [];
+        } else {
+          // Fallback Local Storage Mode
+          allTickets = getLocalData().sort((a, b) => b.id - a.id);
+        }
+      } catch (err) {
+        console.warn('Supabase fetch error, beralih ke local storage:', err.message);
+        allTickets = getLocalData().sort((a, b) => b.id - a.id);
+      } finally {
+        setSubmitLoading(false);
+        applyFilters();
+        updateSummaryCards();
+        generateNewTicketNumberPreview();
+      }
+    }
+
+    // -------------------------------------------------------------------
+    // 3. GENERATOR NOMOR TIKET OTOMATIS (Sesuai Format Penpot / SKPL)
+    // -------------------------------------------------------------------
+    function generateNewTicketNumberPreview() {
+      if (isEditing) return; // Jangan ubah nomor jika sedang edit
+      const currentYear = new Date().getFullYear();
+      let maxNum = 0;
+      allTickets.forEach(t => {
+        if (t.nomor_tiket) {
+          const parts = t.nomor_tiket.split('-');
+          if (parts.length >= 3) {
+            const num = parseInt(parts[2], 10);
+            if (!isNaN(num) && num > maxNum) maxNum = num;
+          }
+        }
+      });
+      const nextSeq = String(maxNum + 1).padStart(4, '0');
+      document.getElementById('nomor_tiket').value = `ADU-${currentYear}-${nextSeq}`;
+    }
+
+    // -------------------------------------------------------------------
+    // 4. VALIDASI LOGIKA KETAT BLACK BOX (TC-01 & TC-02)
+    // -------------------------------------------------------------------
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      hideErrorAlert();
+      hideSuccessAlert();
+
+      const editId = document.getElementById('editRecordId').value;
+      const nomorTiket = document.getElementById('nomor_tiket').value.trim();
+      const namaPelapor = document.getElementById('nama_pelapor').value.trim();
+      const kategori = document.getElementById('kategori').value;
+      const deskripsi = document.getElementById('deskripsi').value.trim();
+      const status = document.getElementById('status').value;
+
+      // =================================================================
+      // IMPLEMENTASI TC-01: Submit Laporan Kosong
+      // Validasi logika di sisi JavaScript: Deskripsi TIDAK BOLEH kosong/spasi!
+      // =================================================================
+      if (!deskripsi || deskripsi.length === 0) {
+        // Tampilkan kotak Alert Error warna merah PERSIS teks SKPL TC-01:
+        showErrorAlert("Deskripsi wajib diisi");
+        document.getElementById('deskripsi').focus();
+        return; // Hentikan eksekusi segera, tolak simpan ke Supabase!
+      }
+
+      if (!namaPelapor || namaPelapor.length === 0) {
+        showErrorAlert("Nama pelapor wajib diisi");
+        document.getElementById('nama_pelapor').focus();
+        return;
+      }
+
+      setSubmitLoading(true);
+
+      const recordPayload = {
+        nomor_tiket: nomorTiket,
+        nama_pelapor: namaPelapor,
+        kategori: kategori,
+        deskripsi: deskripsi,
+        status: status,
+      };
+
+      try {
+        if (editId) {
+          // ===============================================================
+          // IMPLEMENTASI TC-02: Update Status Tiket
+          // Memperbarui status ke 'Diproses' atau status lain pada database
+          // ===============================================================
+          if (supabaseClient) {
+            const { error } = await supabaseClient
+              .from('tickets')
+              .update(recordPayload)
+              .eq('id', editId);
+            if (error) throw error;
+          } else {
+            const data = getLocalData();
+            const idx = data.findIndex(item => item.id == editId);
+            if (idx !== -1) {
+              data[idx] = { ...data[idx], ...recordPayload };
+              saveLocalData(data);
+            }
+          }
+          showSuccessAlert(`Status tiket ${nomorTiket} berhasil diperbarui menjadi "${status}".`);
+          cancelEditMode();
+        } else {
+          // INSERT Fitur Create
+          if (supabaseClient) {
+            const { error } = await supabaseClient
+              .from('tickets')
+              .insert([recordPayload]);
+            if (error) throw error;
+          } else {
+            const data = getLocalData();
+            const newRecord = {
+              id: Date.now(),
+              ...recordPayload,
+              created_at: new Date().toISOString()
+            };
+            data.unshift(newRecord);
+            saveLocalData(data);
+          }
+          showSuccessAlert(`Tiket aduan ${nomorTiket} berhasil diterbitkan.`);
+          resetFormInputs();
+        }
+
+        await fetchTickets();
+      } catch (err) {
+        console.error('Error saat menyimpan data:', err);
+        showErrorAlert(err.message || 'Gagal menyimpan ke database Supabase.');
+      } finally {
+        setSubmitLoading(false);
+      }
+    }
+
+    // -------------------------------------------------------------------
+    // 5. IMPLEMENTASI MUTLAK ANTI-XSS (SEC-01) - createSafeTransactionRow
+    // -------------------------------------------------------------------
+    // DILARANG KERAS menggunakan .innerHTML langsung dengan string pengguna!
+    // Kita gunakan document.createElement() dan .textContent murni.
+    function createSafeTransactionRow(item) {
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100";
+
+      // 1. Kolom Nomor Tiket
+      const tdNomor = document.createElement('td');
+      tdNomor.className = "px-4 py-3.5 text-xs font-semibold text-indigo-600 font-mono whitespace-nowrap";
+      tdNomor.textContent = item.nomor_tiket;
+      tr.appendChild(tdNomor);
+
+      // 2. Kolom Nama Pelapor (Anti-XSS via .textContent)
+      const tdPelapor = document.createElement('td');
+      tdPelapor.className = "px-4 py-3.5 text-xs font-medium text-slate-800 whitespace-nowrap";
+      tdPelapor.textContent = item.nama_pelapor; // Aman dari XSS
+      tr.appendChild(tdPelapor);
+
+      // 3. Kolom Kategori
+      const tdKategori = document.createElement('td');
+      tdKategori.className = "px-4 py-3.5 text-xs text-slate-600 whitespace-nowrap";
+      tdKategori.textContent = item.kategori;
+      tr.appendChild(tdKategori);
+
+      // 4. Kolom Deskripsi (Anti-XSS via .textContent)
+      const tdDeskripsi = document.createElement('td');
+      tdDeskripsi.className = "px-4 py-3.5 text-xs text-slate-600 max-w-xs truncate";
+      tdDeskripsi.title = item.deskripsi; // Tooltip saat hover
+      tdDeskripsi.textContent = item.deskripsi; // Aman dari XSS: payload <img src=x> tampil apa adanya
+      tr.appendChild(tdDeskripsi);
+
+      // 5. Kolom Status Badge
+      const tdStatus = document.createElement('td');
+      tdStatus.className = "px-4 py-3.5 whitespace-nowrap";
+      const statusBadge = document.createElement('span');
+      statusBadge.className = getStatusBadgeClasses(item.status);
+      statusBadge.textContent = item.status;
+      tdStatus.appendChild(statusBadge);
+      tr.appendChild(tdStatus);
+
+      // 6. Kolom Aksi (Edit & Hapus)
+      const tdAksi = document.createElement('td');
+      tdAksi.className = "px-4 py-3.5 text-right whitespace-nowrap text-xs space-x-2";
+
+      // Tombol Edit
+      const btnEdit = document.createElement('button');
+      btnEdit.type = 'button';
+      btnEdit.className = "text-indigo-600 hover:text-indigo-900 font-semibold transition cursor-pointer";
+      btnEdit.textContent = "Edit";
+      btnEdit.onclick = () => startEditMode(item);
+      tdAksi.appendChild(btnEdit);
+
+      // Tombol Hapus
+      const btnHapus = document.createElement('button');
+      btnHapus.type = 'button';
+      btnHapus.className = "text-rose-600 hover:text-rose-900 font-semibold transition cursor-pointer";
+      btnHapus.textContent = "Hapus";
+      btnHapus.onclick = () => deleteTicket(item.id, item.nomor_tiket);
+      tdAksi.appendChild(btnHapus);
+
+      tr.appendChild(tdAksi);
+      return tr;
+    }
+
+    function getStatusBadgeClasses(status) {
+      if (status === 'Pending') {
+        return "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200";
+      } else if (status === 'Diproses') {
+        return "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-100 text-blue-800 border border-blue-200";
+      } else if (status === 'Selesai') {
+        return "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200";
+      }
+      return "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200";
+    }
+
+    // -------------------------------------------------------------------
+    // 6. FITUR CRUD: UPDATE & DELETE
+    // -------------------------------------------------------------------
+    function startEditMode(item) {
+      isEditing = true;
+      hideErrorAlert();
+      hideSuccessAlert();
+
+      document.getElementById('editRecordId').value = item.id;
+      document.getElementById('nomor_tiket').value = item.nomor_tiket;
+      document.getElementById('nama_pelapor').value = item.nama_pelapor;
+      document.getElementById('kategori').value = item.kategori;
+      document.getElementById('deskripsi').value = item.deskripsi;
+      document.getElementById('status').value = item.status;
+
+      document.getElementById('formTitle').textContent = `Edit Tiket: ${item.nomor_tiket}`;
+      document.getElementById('formSubtitle').textContent = "Ubah status penanganan atau perbarui detail aduan.";
+      document.getElementById('formModeBadge').textContent = "Mode Edit";
+      document.getElementById('formModeBadge').className = "text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full";
+      document.getElementById('btnSubmitText').textContent = "Simpan Perubahan";
+      document.getElementById('btnCancelEdit').classList.remove('hidden');
+
+      // Scroll form ke tampilan
+      document.getElementById('ticketForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function cancelEditMode() {
+      isEditing = false;
+      document.getElementById('editRecordId').value = '';
+      resetFormInputs();
+
+      document.getElementById('formTitle').textContent = "Buat Pengaduan";
+      document.getElementById('formSubtitle').textContent = "Isi detail kendala atau aspirasi. Nomor tiket diterbitkan otomatis.";
+      document.getElementById('formModeBadge').textContent = "Mode Input";
+      document.getElementById('formModeBadge').className = "text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full";
+      document.getElementById('btnSubmitText').textContent = "Kirim Pengaduan";
+      document.getElementById('btnCancelEdit').classList.add('hidden');
+
+      generateNewTicketNumberPreview();
+    }
+
+    async function deleteTicket(id, nomorTiket) {
+      hideErrorAlert();
+      hideSuccessAlert();
+
+      const yakin = confirm(`Apakah Anda yakin ingin menghapus tiket "${nomorTiket}"?`);
+      if (!yakin) return;
+
+      setSubmitLoading(true);
+      try {
+        if (supabaseClient) {
+          const { error } = await supabaseClient
+            .from('tickets')
+            .delete()
+            .eq('id', id);
+          if (error) throw error;
+        } else {
+          let data = getLocalData();
+          data = data.filter(item => item.id != id);
+          saveLocalData(data);
+        }
+        showSuccessAlert(`Tiket ${nomorTiket} berhasil dihapus.`);
+        if (document.getElementById('editRecordId').value == id) {
+          cancelEditMode();
+        }
+        await fetchTickets();
+      } catch (err) {
+        console.error('Error saat menghapus:', err);
+        showErrorAlert(err.message || 'Gagal menghapus tiket dari database.');
+      } finally {
+        setSubmitLoading(false);
+      }
+    }
+
+    function resetFormInputs() {
+      document.getElementById('nama_pelapor').value = '';
+      document.getElementById('deskripsi').value = '';
+      document.getElementById('status').value = 'Pending';
+      document.getElementById('kategori').value = 'Kendala Teknis';
+    }
+
+    // -------------------------------------------------------------------
+    // 7. PENCARIAN & FILTER INTERAKTIF
+    // -------------------------------------------------------------------
+    function applyFilters() {
+      const searchKeyword = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('filterStatus').value;
+      const kategoriFilter = document.getElementById('filterKategori').value;
+
+      const filtered = allTickets.filter(item => {
+        const matchSearch = !searchKeyword ||
+          (item.nomor_tiket && item.nomor_tiket.toLowerCase().includes(searchKeyword)) ||
+          (item.nama_pelapor && item.nama_pelapor.toLowerCase().includes(searchKeyword)) ||
+          (item.deskripsi && item.deskripsi.toLowerCase().includes(searchKeyword));
+
+        const matchStatus = (statusFilter === 'ALL') || (item.status === statusFilter);
+        const matchKategori = (kategoriFilter === 'ALL') || (item.kategori === kategoriFilter);
+
+        return matchSearch && matchStatus && matchKategori;
+      });
+
+      renderTable(filtered);
+    }
+
+    function renderTable(tickets) {
+      const tbody = document.getElementById('ticketTableBody');
+      const emptyState = document.getElementById('emptyState');
+      const countBadge = document.getElementById('tableRecordCount');
+
+      tbody.innerHTML = '';
+      countBadge.textContent = `${tickets.length} Laporan`;
+
+      if (tickets.length === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+        tickets.forEach(ticket => {
+          // Render aman melalui createSafeTransactionRow (Anti-XSS SEC-01)
+          const row = createSafeTransactionRow(ticket);
+          tbody.appendChild(row);
+        });
+      }
+    }
+
+    function updateSummaryCards() {
+      const total = allTickets.length;
+      const proses = allTickets.filter(t => t.status === 'Pending' || t.status === 'Diproses').length;
+      const selesai = allTickets.filter(t => t.status === 'Selesai').length;
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statProses').textContent = proses;
+      document.getElementById('statSelesai').textContent = selesai;
+    }
+
+    // -------------------------------------------------------------------
+    // 8. PANEL SIMULASI PENGUJIAN 1-KLIK (QA & SECURITY HELPER BAR)
+    // -------------------------------------------------------------------
+
+    // TC-01: Submit Laporan Kosong -> Verifikasi Pesan "Deskripsi wajib diisi"
+    function runTestTC01() {
+      cancelEditMode();
+      document.getElementById('nama_pelapor').value = 'Tester Black Box QA';
+      document.getElementById('kategori').value = 'Kendala Teknis';
+      document.getElementById('deskripsi').value = ''; // KOSONGKAN DESKRIPSI
+      document.getElementById('status').value = 'Pending';
+
+      // Panggil submit
+      document.getElementById('ticketForm').dispatchEvent(new Event('submit'));
+    }
+
+    // TC-02: Update Status Tiket -> Verifikasi pembaruan status ke 'Diproses'
+    function runTestTC02() {
+      if (allTickets.length === 0) {
+        showErrorAlert("Tidak ada data tiket untuk diuji update status.");
+        return;
+      }
+      // Pilih tiket pertama
+      const targetTicket = allTickets[0];
+      startEditMode(targetTicket);
+      document.getElementById('status').value = 'Diproses'; // Ubah status ke Diproses
+
+      // Panggil submit
+      document.getElementById('ticketForm').dispatchEvent(new Event('submit'));
+    }
+
+    // SEC-01: Uji Anti-XSS Payload
+    function runTestSEC01() {
+      cancelEditMode();
+      document.getElementById('nama_pelapor').value = 'Security Auditor <b onmouseover=alert(1)>SEC</b>';
+      document.getElementById('kategori').value = 'Kendala Teknis';
+      // Injeksi payload XSS berbahaya:
+      document.getElementById('deskripsi').value = '<img src=x onerror=alert("Jebol XSS!")>';
+      document.getElementById('status').value = 'Pending';
+
+      // Panggil submit
+      document.getElementById('ticketForm').dispatchEvent(new Event('submit'));
+    }
+
+    // -------------------------------------------------------------------
+    // 9. HELPER UI & ALERT SYSTEM
+    // -------------------------------------------------------------------
+    function showErrorAlert(message) {
+      const box = document.getElementById('errorAlertBox');
+      const text = document.getElementById('errorMessageText');
+      text.textContent = message;
+      box.classList.remove('hidden');
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function hideErrorAlert() {
+      document.getElementById('errorAlertBox').classList.add('hidden');
+    }
+
+    function showSuccessAlert(message) {
+      const box = document.getElementById('successAlertBox');
+      const text = document.getElementById('successMessageText');
+      text.textContent = message;
+      box.classList.remove('hidden');
+      setTimeout(hideSuccessAlert, 6000);
+    }
+
+    function hideSuccessAlert() {
+      document.getElementById('successAlertBox').classList.add('hidden');
+    }
+
+    function setSubmitLoading(isLoading) {
+      const btn = document.getElementById('btnSubmit');
+      const spinner = document.getElementById('submitSpinner');
+      if (isLoading) {
+        btn.disabled = true;
+        btn.classList.add('opacity-75', 'cursor-not-allowed');
+        spinner.classList.remove('hidden');
+      } else {
+        btn.disabled = false;
+        btn.classList.remove('opacity-75', 'cursor-not-allowed');
+        spinner.classList.add('hidden');
+      }
+    }
+
+    function toggleConfigModal() {
+      const modal = document.getElementById('configModal');
+      modal.classList.toggle('hidden');
+    }
+
+    // -------------------------------------------------------------------
+    // 10. SETUP INISIALISASI HALAMAN
+    // -------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      // Periksa status koneksi
+      const badge = document.getElementById('statusBadge');
+      const badgeText = document.getElementById('statusBadgeText');
+      const banner = document.getElementById('connectionBanner');
+
+      if (isCloudSupabase) {
+        badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 transition-all";
+        badgeText.textContent = "Cloud Supabase Active";
+        banner.classList.add('hidden'); // Sembunyikan banner jika cloud sudah aktif
+      } else {
+        badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 transition-all";
+        badgeText.textContent = "Local Demo Mode";
+      }
+
+      fetchTickets();
+    });
+  </script>
+</body>
+
+</html>
