@@ -206,7 +206,7 @@ function handleLoginSubmit(e) {
       switchPage('home');
       updateDashboardStats();
 
-      const roleLabel = user.role === 'dosen' ? 'Dosen' : (user.role === 'admin' ? 'Administrator' : 'Mahasiswa');
+      const roleLabel = user.role === 'dosen' ? 'Dosen (Akses Penuh)' : 'Mahasiswa (Pelapor)';
       showToast(`Selamat datang, ${user.nama}! Anda masuk sebagai ${roleLabel}.`);
     } else {
       if (errBox) errBox.classList.remove('hidden');
@@ -229,51 +229,50 @@ function applyUserProfile(user) {
   if (userNameDisplay) userNameDisplay.textContent = user.nama;
   if (userAvatar) {
     const initials = user.nama.split(' ').filter(Boolean).map(w => w[0]).join('').substring(0, 2).toUpperCase();
-    userAvatar.textContent = initials || (user.role === 'dosen' ? 'D' : 'M');
+    userAvatar.textContent = initials || (user.role === 'dosen' ? 'YA' : 'M');
   }
   if (userRoleDesc) {
     if (user.role === 'dosen') {
-      userRoleDesc.textContent = `Dosen • Tenaga Pengajar ${user.kelas || ''}`;
-    } else if (user.role === 'admin') {
-      userRoleDesc.textContent = 'Petugas • Biro TI & Sarana';
+      userRoleDesc.textContent = 'Dosen • Tenaga Pengajar (Akses Penuh)';
     } else {
       userRoleDesc.textContent = `Mahasiswa • Kelas ${user.kelas || 'TI1D'}`;
     }
   }
-  if (inputPelapor && user.role !== 'admin') {
+  if (inputPelapor) {
     inputPelapor.value = user.nama;
   }
 }
 
 /* =========================================================================
-   3. ROLE SWITCHING & MODAL ADMIN PASSWORD
+   3. ROLE SWITCHING & MODAL DOSEN PASSWORD
+   Sistem 2 Peran: Mahasiswa (Pelapor) dan Dosen (Akses Penuh / Pengajar)
    ========================================================================= */
 function handleRoleSwitch(newRole) {
-  if (newRole === 'admin') {
-    if (currentRole === 'admin') {
-      showToast('Anda sudah berada dalam peran Administrator.');
+  if (newRole === 'dosen') {
+    if (currentRole === 'dosen') {
+      showToast('Anda sudah berada dalam peran Dosen (Akses Penuh).');
       return;
     }
-    // Wajib verifikasi kata sandi untuk beralih ke admin
+    // Wajib verifikasi kata sandi untuk beralih ke role Dosen
     openAdminPasswordModal();
     return;
   }
 
-  executeRoleSwitch(newRole);
+  executeRoleSwitch('mahasiswa');
 }
 
 function executeRoleSwitch(newRole) {
-  currentRole = newRole;
-  localStorage.setItem('APP_USER_ROLE', newRole);
+  currentRole = newRole === 'dosen' ? 'dosen' : 'mahasiswa';
+  localStorage.setItem('APP_USER_ROLE', currentRole);
   applyRBAC();
 
-  const roleName = newRole === 'admin' 
-    ? '🛡️ Administrator (Akses Penuh)' 
-    : (newRole === 'dosen' ? '📖 Dosen (Tenaga Pengajar)' : '🎓 Mahasiswa (Pelapor)');
+  const roleName = currentRole === 'dosen' 
+    ? '📖 Dosen (Tenaga Pengajar - Akses Penuh)' 
+    : '🎓 Mahasiswa (Pelapor)';
   showToast(`Peran aktif beralih ke: ${roleName}`);
 
   // TRANSISI OTOMATIS ANTAR HALAMAN BERDASARKAN ROLE
-  if (newRole === 'admin') {
+  if (currentRole === 'dosen') {
     switchPage('page3');
   } else {
     const p3View = document.getElementById('view-page3');
@@ -284,7 +283,7 @@ function executeRoleSwitch(newRole) {
 }
 
 function toggleRoleQA() {
-  const nextRole = currentRole === 'admin' ? 'mahasiswa' : 'admin';
+  const nextRole = currentRole === 'dosen' ? 'mahasiswa' : 'dosen';
   handleRoleSwitch(nextRole);
 }
 
@@ -340,13 +339,13 @@ function submitAdminPassword() {
   const errorText = document.getElementById('adminPasswordErrorText');
   const inputVal = passInput ? passInput.value.trim() : '';
 
-  if (inputVal === ADMIN_PASSWORD) {
+  if (inputVal === DOSEN_PASSWORD || inputVal === 'Fira Cantik') {
     closeAdminPasswordModal();
-    executeRoleSwitch('admin');
-    showToast('🛡️ Otorisasi Berhasil! Selamat datang, Administrator.');
+    executeRoleSwitch('dosen');
+    showToast('📖 Otorisasi Berhasil! Selamat datang, Dosen (Akses Penuh).');
   } else {
     if (errorBox) errorBox.classList.remove('hidden');
-    if (errorText) errorText.textContent = 'Kata sandi salah! Akses Administrator ditolak.';
+    if (errorText) errorText.textContent = 'Kata sandi salah! Akses Dosen ditolak.';
     if (passInput) {
       passInput.classList.add('border-rose-400', 'focus:border-rose-500', 'focus:ring-rose-200');
       passInput.focus();
@@ -356,7 +355,7 @@ function submitAdminPassword() {
 }
 
 /* =========================================================================
-   4. PENEGAKAN HAK AKSES PERAN (RBAC ENFORCEMENT)
+   4. PENEGAKAN HAK AKSES PERAN (RBAC ENFORCEMENT: 2 ROLE - MAHASISWA & DOSEN)
    ========================================================================= */
 function applyRBAC() {
   const selector = document.getElementById('roleSelector');
@@ -364,7 +363,6 @@ function applyRBAC() {
 
   const btnHeaderMhs = document.getElementById('toggleHeaderMahasiswa');
   const btnHeaderDsn = document.getElementById('toggleHeaderDosen');
-  const btnHeaderAdm = document.getElementById('toggleHeaderAdmin');
   const adminBanner = document.getElementById('adminModeBanner');
 
   const badgeIndicator = document.getElementById('roleBadgeIndicator');
@@ -382,110 +380,57 @@ function applyRBAC() {
 
   const user = getCurrentUser();
 
-  if (currentRole === 'admin') {
-    // ================= MODE ADMINISTRATOR (FULL ACCESS) =================
-    if (btnHeaderAdm) {
-      btnHeaderAdm.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs bg-slate-900 text-white';
+  if (currentRole === 'dosen') {
+    // ================= MODE DOSEN (AKSES PENUH / ALL FEATURES UNLOCKED) =================
+    if (btnHeaderDsn) {
+      btnHeaderDsn.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs bg-amber-600 text-white';
     }
     if (btnHeaderMhs) {
       btnHeaderMhs.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-500 hover:text-slate-900';
-    }
-    if (btnHeaderDsn) {
-      btnHeaderDsn.classList.add('hidden');
     }
     if (adminBanner) adminBanner.classList.remove('hidden');
 
     if (badgeIndicator) {
-      badgeIndicator.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200';
-      badgeIndicator.textContent = 'Administrator';
-    }
-    if (topRoleBadge) {
-      topRoleBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
-    }
-    if (topRoleText) topRoleText.textContent = 'Role: Administrator (Akses Penuh)';
-    if (topRoleDot) topRoleDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse';
-
-    if (userAvatar) {
-      userAvatar.className = 'w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs shrink-0';
-      userAvatar.textContent = 'AD';
-    }
-    if (userNameDisplay) userNameDisplay.textContent = user ? user.nama : 'Admin Help Desk';
-    if (userRoleDesc) userRoleDesc.textContent = 'Petugas • Biro TI & Sarana';
-
-    if (navLockBadge) {
-      navLockBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1';
-      navLockBadge.innerHTML = `
-        <svg class="w-2.5 h-2.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-        </svg>
-        <span>Akses Penuh</span>
-      `;
-    }
-    if (navPage3) {
-      navPage3.classList.remove('opacity-60');
-      navPage3.title = 'Akses Antrean Terbuka untuk Admin';
-    }
-    if (qaRolePill) {
-      qaRolePill.className = 'text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800';
-      qaRolePill.textContent = 'Admin (Full)';
-    }
-    if (btnPage2ToPage3Text) {
-      btnPage2ToPage3Text.textContent = 'Kelola di Antrean Aspirasi (Admin) →';
-    }
-    if (qaPanel) qaPanel.classList.remove('hidden');
-
-  } else if (currentRole === 'dosen') {
-    // ================= MODE DOSEN (KHUSUS YUSUF ANGGIT PRASETYO) =================
-    if (btnHeaderMhs) {
-      btnHeaderMhs.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-500 hover:text-slate-900';
-    }
-    if (btnHeaderAdm) {
-      btnHeaderAdm.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-500 hover:text-slate-900';
-    }
-    if (btnHeaderDsn) {
-      btnHeaderDsn.classList.remove('hidden');
-      btnHeaderDsn.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs bg-amber-600 text-white';
-    }
-    if (adminBanner) adminBanner.classList.add('hidden');
-
-    if (badgeIndicator) {
       badgeIndicator.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200';
-      badgeIndicator.textContent = 'Dosen (Pengajar)';
+      badgeIndicator.textContent = 'Dosen (Akses Penuh)';
     }
     if (topRoleBadge) {
       topRoleBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200';
     }
-    if (topRoleText) topRoleText.textContent = 'Role: Dosen (Tenaga Pengajar)';
-    if (topRoleDot) topRoleDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500';
+    if (topRoleText) topRoleText.textContent = 'Role: Dosen (Akses Penuh)';
+    if (topRoleDot) topRoleDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse';
 
     if (userAvatar) {
       userAvatar.className = 'w-8 h-8 rounded-full bg-amber-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs shrink-0';
       userAvatar.textContent = user ? user.nama.split(' ').filter(Boolean).map(w => w[0]).join('').substring(0, 2).toUpperCase() : 'YA';
     }
     if (userNameDisplay) userNameDisplay.textContent = user ? user.nama : 'Yusuf Anggit Prasetyo';
-    if (userRoleDesc) userRoleDesc.textContent = 'Dosen • Tenaga Pengajar TI1D';
+    if (userRoleDesc) userRoleDesc.textContent = 'Dosen • Tenaga Pengajar (Akses Penuh)';
 
+    // Buka Kunci Menu Antrean Aspirasi untuk Dosen
     if (navLockBadge) {
-      navLockBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1';
+      navLockBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1';
       navLockBadge.innerHTML = `
-        <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+        <svg class="w-2.5 h-2.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
         </svg>
-        <span>Khusus Admin</span>
+        <span>Akses Dosen</span>
       `;
     }
     if (navPage3) {
-      navPage3.classList.add('opacity-75');
-      navPage3.title = 'Terkunci: Khusus Role Admin';
+      navPage3.classList.remove('opacity-60', 'opacity-75');
+      navPage3.title = 'Akses Antrean Terbuka untuk Dosen';
     }
     if (qaRolePill) {
       qaRolePill.className = 'text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-100 text-amber-800';
-      qaRolePill.textContent = 'Dosen';
+      qaRolePill.textContent = 'Dosen (Full)';
     }
     if (btnPage2ToPage3Text) {
-      btnPage2ToPage3Text.textContent = 'Lihat Panduan & SOP →';
+      btnPage2ToPage3Text.textContent = 'Kelola di Antrean Aspirasi (Dosen) →';
     }
-    if (qaPanel) qaPanel.classList.add('hidden');
+
+    // Panel Uji Cepat SKPL-06 TERBUKA untuk Dosen
+    if (qaPanel) qaPanel.classList.remove('hidden');
 
     const inputPelapor = document.getElementById('nama_pelapor');
     if (inputPelapor && user) {
@@ -493,15 +438,12 @@ function applyRBAC() {
     }
 
   } else {
-    // ================= MODE MAHASISWA (RESTRICTED ACCESS) =================
+    // ================= MODE MAHASISWA (BEBERAPA MENU DIBATASI / RESTRICTED) =================
     if (btnHeaderMhs) {
       btnHeaderMhs.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs bg-indigo-600 text-white';
     }
-    if (btnHeaderAdm) {
-      btnHeaderAdm.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-500 hover:text-slate-900';
-    }
     if (btnHeaderDsn) {
-      btnHeaderDsn.classList.add('hidden');
+      btnHeaderDsn.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-500 hover:text-slate-900';
     }
     if (adminBanner) adminBanner.classList.add('hidden');
 
@@ -530,18 +472,19 @@ function applyRBAC() {
       userRoleDesc.textContent = user ? `Mahasiswa • Kelas ${user.kelas || 'TI1D'}` : 'Pelapor • Sivitas Kampus';
     }
 
+    // Kunci Menu Antrean Aspirasi untuk Mahasiswa
     if (navLockBadge) {
       navLockBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1';
       navLockBadge.innerHTML = `
         <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
         </svg>
-        <span>Khusus Admin</span>
+        <span>Khusus Dosen</span>
       `;
     }
     if (navPage3) {
       navPage3.classList.add('opacity-75');
-      navPage3.title = 'Terkunci: Khusus Role Admin';
+      navPage3.title = 'Terkunci: Khusus Role Dosen';
     }
     if (qaRolePill) {
       qaRolePill.className = 'text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800';
@@ -550,10 +493,12 @@ function applyRBAC() {
     if (btnPage2ToPage3Text) {
       btnPage2ToPage3Text.textContent = 'Lihat Panduan & SOP →';
     }
+
+    // Panel Uji Cepat SKPL-06 DISEMBUNYIKAN untuk Mahasiswa
     if (qaPanel) qaPanel.classList.add('hidden');
 
     const inputPelapor = document.getElementById('nama_pelapor');
-    if (inputPelapor && user && user.role !== 'admin') {
+    if (inputPelapor && user) {
       inputPelapor.value = user.nama;
     }
   }
@@ -568,7 +513,10 @@ function closeAccessDeniedModal() {
   document.getElementById('accessDeniedModal').classList.add('hidden');
 }
 
-function elevateToAdminAndOpen() {
+function elevateToDosenAndOpen() {
   closeAccessDeniedModal();
-  handleRoleSwitch('admin');
+  handleRoleSwitch('dosen');
 }
+
+// Alias untuk menjaga kompatibilitas jika ada pemicu lama
+const elevateToAdminAndOpen = elevateToDosenAndOpen;

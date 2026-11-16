@@ -43,11 +43,13 @@ const LOCAL_STORAGE_KEY = 'ASPIRASI_PENPOT_TICKETS_V2';
 const MY_TICKETS_KEY = 'ASPIRASI_MY_TICKETS_HISTORY_V1';
 const SESSION_USER_KEY = 'PORTAL_AUTH_CURRENT_USER_V1';
 
-// Administrator Password untuk RBAC
-const ADMIN_PASSWORD = 'Fira Cantik';
+// Kata Sandi Otorisasi Dosen (Akses Penuh Pengganti Sistem Admin)
+const DOSEN_PASSWORD = 'S!I76yQDVMCKaNRrKP1FAj';
+const ADMIN_PASSWORD = DOSEN_PASSWORD; // Kompatibilitas mundur
 
 // =========================================================================
 // BASIS DATA AKUN PENGGUNA RESMI (DARI EXCEL / SINKRONISASI KAMPUS)
+// Sistem 2 Peran: Mahasiswa (Pelapor) dan Dosen (Akses Penuh)
 // Aturan Khusus: NIM 260102037 (YUSUF ANGGIT PRASETYO) memiliki peran DOSEN
 // =========================================================================
 const USER_ACCOUNTS = [
@@ -84,8 +86,5 @@ const USER_ACCOUNTS = [
   { nim: "260302048", nama: "RISKA ASTUTI", kelas: "TI1D", username: "260302048", password: "S!D7OED9ncnZG9YEwrdEoH", role: "mahasiswa" },
   { nim: "260302049", nama: "NAJMA MAHAWA AULIA RAHMA", kelas: "TI1D", username: "260302049", password: "S!bMedktQEPcIk0rFXb5bN", role: "mahasiswa" },
   { nim: "260302052", nama: "AIDHA NURDZULLAIKHA", kelas: "TI1D", username: "260302052", password: "S!1-6sRsrsfciYerl17lly", role: "mahasiswa" },
-  { nim: "260302059", nama: "IRFAN DWI MEIRAMDANI", kelas: "TI1D", username: "260302059", password: "S!kzppitMZXUKHM8I0xyFM", role: "mahasiswa" },
-  
-  // Akun Administrator Sistem
-  { nim: "ADMIN01", nama: "Admin Help Desk", kelas: "BIRO TI", username: "admin", password: "Fira Cantik", role: "admin" }
+  { nim: "260302059", nama: "IRFAN DWI MEIRAMDANI", kelas: "TI1D", username: "260302059", password: "S!kzppitMZXUKHM8I0xyFM", role: "mahasiswa" }
 ];

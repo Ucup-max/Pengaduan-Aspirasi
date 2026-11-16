@@ -213,10 +213,10 @@ function testTC01() {
 }
 
 function testTC02() {
-  // Karena mahasiswa dibatasi RBAC, alihkan sementara ke role Admin untuk pengujian TC-02
-  if (currentRole !== 'admin') {
-    handleRoleSwitch('admin');
-    showToast('Role otomatis dialihkan ke Admin untuk mendemokan update status (TC-02)!');
+  // Karena mahasiswa dibatasi RBAC, alihkan sementara ke role Dosen untuk pengujian TC-02
+  if (currentRole !== 'dosen') {
+    executeRoleSwitch('dosen');
+    showToast('Role otomatis dialihkan ke Dosen untuk mendemokan update status (TC-02)!');
   }
   switchPage('page3');
   const item = ticketsState.find(t => t.status === 'Pending') || ticketsState[0];

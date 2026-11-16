@@ -215,36 +215,33 @@
           </p>
         </div>
 
-        <!-- Quick Demo Account Chips (Memudahkan Penguji / Dosen / Mahasiswa Langsung Klik) -->
+        <!-- Quick Demo Account Chips (2 Role: Dosen Akses Penuh & Mahasiswa) -->
         <div class="pt-4 border-t border-slate-100 space-y-2">
-          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Akses Uji Coba Cepat:</div>
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Akses Uji Coba Cepat (2 Role):</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <button 
               type="button" 
               onclick="fillDemoAccount('260102037')" 
-              class="px-2.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-left transition-all cursor-pointer"
+              class="px-3 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-left transition-all cursor-pointer shadow-2xs group"
             >
-              <div class="text-[10px] font-bold text-amber-700">📖 Dosen</div>
-              <div class="text-[11px] font-extrabold truncate">Yusuf Anggit</div>
-              <div class="text-[9px] text-amber-600 font-mono">260102037</div>
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-amber-700">📖 Dosen (Akses Penuh)</span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-200/80 text-amber-800 font-mono font-bold">260102037</span>
+              </div>
+              <div class="text-xs font-extrabold truncate text-slate-900 mt-0.5">Yusuf Anggit Prasetyo</div>
+              <div class="text-[10px] text-amber-700/80">Semua fitur terbuka</div>
             </button>
             <button 
               type="button" 
               onclick="fillDemoAccount('260302026')" 
-              class="px-2.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-left transition-all cursor-pointer"
+              class="px-3 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-left transition-all cursor-pointer shadow-2xs group"
             >
-              <div class="text-[10px] font-bold text-blue-700">🎓 Mahasiswa</div>
-              <div class="text-[11px] font-extrabold truncate">Fadhol Afif</div>
-              <div class="text-[9px] text-blue-600 font-mono">260302026</div>
-            </button>
-            <button 
-              type="button" 
-              onclick="fillDemoAccount('admin')" 
-              class="px-2.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-left transition-all cursor-pointer"
-            >
-              <div class="text-[10px] font-bold text-emerald-700">🛡️ Admin</div>
-              <div class="text-[11px] font-extrabold truncate">Help Desk</div>
-              <div class="text-[9px] text-emerald-600 font-mono">admin</div>
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-blue-700">🎓 Mahasiswa (Pelapor)</span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-200/80 text-blue-800 font-mono font-bold">260302026</span>
+              </div>
+              <div class="text-xs font-extrabold truncate text-slate-900 mt-0.5">Fadhol Afif Afriyanto</div>
+              <div class="text-[10px] text-blue-700/80">Beberapa menu dibatasi</div>
             </button>
           </div>
         </div>
@@ -319,12 +316,13 @@
             </div>
           </button>
 
-          <!-- Item 3: Antrean Aspirasi (Page 3 - KHUSUS ROLE ADMIN) -->
+          <!-- Item 3: Antrean Aspirasi (Page 3 - KHUSUS ROLE DOSEN / AKSES PENUH) -->
           <button 
             type="button" 
             onclick="switchPage('page3')" 
             id="nav-page3" 
-            class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer group"
+            class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer group opacity-75"
+            title="Terkunci: Khusus Role Dosen"
           >
             <div class="flex items-center gap-3">
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -332,12 +330,12 @@
               </svg>
               <span>Antrean Aspirasi</span>
             </div>
-            <!-- Badge Lock / Admin indicator -->
+            <!-- Badge Lock / Dosen indicator -->
             <span id="navLockBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
               <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
               </svg>
-              <span>Khusus Admin</span>
+              <span>Khusus Dosen</span>
             </span>
           </button>
 
@@ -379,8 +377,7 @@
             class="w-full pl-2.5 pr-8 py-1.5 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-800 shadow-2xs focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
           >
             <option value="mahasiswa">🎓 Mahasiswa (Pelapor)</option>
-            <option value="dosen">📖 Dosen (Tenaga Pengajar)</option>
-            <option value="admin">🛡️ Admin (Petugas Help Desk)</option>
+            <option value="dosen">📖 Dosen (Akses Penuh)</option>
           </select>
         </div>
 
@@ -435,14 +432,14 @@
             />
           </div>
 
-          <!-- Quick Role Switcher Buttons (Interaktif 1-Klik) -->
+          <!-- Quick Role Switcher Buttons (2 Role Eksklusif: Mahasiswa & Dosen) -->
           <div class="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 self-start sm:self-auto shrink-0">
             <button 
               type="button" 
               id="toggleHeaderMahasiswa" 
               onclick="handleRoleSwitch('mahasiswa')" 
               class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs bg-indigo-600 text-white"
-              title="Beralih ke peran Mahasiswa"
+              title="Beralih ke peran Mahasiswa (Pelapor)"
             >
               <span>🎓</span>
               <span>Mahasiswa</span>
@@ -451,21 +448,11 @@
               type="button" 
               id="toggleHeaderDosen" 
               onclick="handleRoleSwitch('dosen')" 
-              class="hidden px-2.5 py-1 rounded-lg text-xs font-bold transition-all items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900"
-              title="Peran Dosen"
+              class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900"
+              title="Beralih ke peran Dosen (Akses Penuh)"
             >
               <span>📖</span>
               <span>Dosen</span>
-            </button>
-            <button 
-              type="button" 
-              id="toggleHeaderAdmin" 
-              onclick="handleRoleSwitch('admin')" 
-              class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900"
-              title="Beralih ke peran Admin Help Desk"
-            >
-              <span>🛡️</span>
-              <span>Admin</span>
             </button>
           </div>
         </div>
@@ -506,18 +493,18 @@
         </div>
       </header>
 
-      <!-- NOTIFIKASI BANNER MODE ADMIN AKTIF -->
-      <div id="adminModeBanner" class="hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs animate-in slide-in-from-top duration-200">
+      <!-- NOTIFIKASI BANNER MODE DOSEN (AKSES PENUH) AKTIF -->
+      <div id="adminModeBanner" class="hidden bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs animate-in slide-in-from-top duration-200">
         <div class="flex items-center gap-2.5 font-medium">
-          <span class="px-2 py-0.5 rounded bg-emerald-800/90 font-bold text-[10px] tracking-wide uppercase shrink-0">Admin Aktif</span>
-          <span>Anda login sebagai <strong>Administrator Help Desk</strong>. Memiliki wewenang penuh membuka <strong>Antrean Aspirasi</strong> dan memperbarui status tiket.</span>
+          <span class="px-2 py-0.5 rounded bg-amber-900/90 font-bold text-[10px] tracking-wide uppercase shrink-0">Dosen Aktif</span>
+          <span>Anda login sebagai <strong>Dosen (Akses Penuh)</strong>. Semua fitur terbuka: mengelola <strong>Antrean Aspirasi</strong>, memperbarui status tiket, dan membuka panel pengujian.</span>
         </div>
         <div class="flex items-center gap-2 shrink-0">
-          <button type="button" onclick="switchPage('page3')" class="px-3 py-1 rounded-lg bg-white text-emerald-900 font-bold hover:bg-emerald-50 transition-colors text-xs shadow-xs cursor-pointer">
-            Kelola Antrean Tiket →
+          <button type="button" onclick="switchPage('page3')" class="px-3 py-1 rounded-lg bg-white text-amber-900 font-bold hover:bg-amber-50 transition-colors text-xs shadow-xs cursor-pointer">
+            Kelola Antrean Aspirasi →
           </button>
-          <button type="button" onclick="handleRoleSwitch('mahasiswa')" class="px-3 py-1 rounded-lg bg-emerald-800/90 hover:bg-emerald-900 text-white font-medium transition-colors text-xs cursor-pointer">
-            Kembali ke Mahasiswa
+          <button type="button" onclick="handleRoleSwitch('mahasiswa')" class="px-3 py-1 rounded-lg bg-amber-800/90 hover:bg-amber-900 text-white font-medium transition-colors text-xs cursor-pointer">
+            Beralih ke Mahasiswa
           </button>
         </div>
       </div>
@@ -1666,7 +1653,7 @@
           Peran Anda saat ini adalah <strong class="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">Mahasiswa (Pelapor)</strong>.
         </p>
         <p>
-          Berdasarkan kebijakan sistem RBAC, halaman <strong id="deniedFeatureName" class="text-slate-900 font-bold">Antrean Aspirasi</strong> dan pembaruan status hanya dapat diakses oleh <strong class="text-slate-900">Administrator / Petugas Help Desk</strong>.
+          Berdasarkan kebijakan sistem RBAC, halaman <strong id="deniedFeatureName" class="text-slate-900 font-bold">Antrean Aspirasi</strong> dan pembaruan status hanya dapat diakses oleh <strong class="text-slate-900">Dosen (Tenaga Pengajar)</strong>.
         </p>
         <p class="text-[11px] text-slate-400 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
           Mahasiswa hanya memiliki hak akses untuk <strong>Kirim Aspirasi</strong>, melihat <strong>Nomor Tiket & Status</strong> miliknya, serta membaca <strong>Panduan & SOP</strong>.
@@ -1676,10 +1663,10 @@
       <div class="pt-2 flex items-center gap-2">
         <button 
           type="button" 
-          onclick="elevateToAdminAndOpen()" 
-          class="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+          onclick="elevateToDosenAndOpen()" 
+          class="flex-1 py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
         >
-          <span>🛡️ Beralih ke Role Admin</span>
+          <span>📖 Beralih ke Role Dosen</span>
         </button>
         <button 
           type="button" 
@@ -1692,19 +1679,19 @@
     </div>
   </div>
 
-  <!-- ================= MODAL VERIFIKASI KATA SANDI ADMIN ================= -->
+  <!-- ================= MODAL VERIFIKASI KATA SANDI DOSEN ================= -->
   <div id="adminPasswordModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-sm w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
       <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold shadow-xs">
-            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold shadow-xs">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
             </svg>
           </div>
           <div>
-            <h3 class="text-sm font-bold text-slate-900">Autentikasi Administrator</h3>
-            <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Verifikasi Hak Akses RBAC</p>
+            <h3 class="text-sm font-bold text-slate-900">Autentikasi Dosen</h3>
+            <p class="text-[10px] text-amber-700 font-semibold uppercase tracking-wider">Verifikasi Hak Akses Dosen</p>
           </div>
         </div>
         <button type="button" onclick="closeAdminPasswordModal()" class="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center cursor-pointer">
@@ -1714,19 +1701,19 @@
 
       <div class="space-y-3 text-xs">
         <p class="text-slate-600 leading-relaxed">
-          Untuk beralih ke peran <strong class="text-slate-900 font-bold">Administrator Help Desk</strong>, silakan masukkan kata sandi resmi:
+          Untuk beralih ke peran <strong class="text-slate-900 font-bold">Dosen (Akses Penuh)</strong>, silakan masukkan kata sandi resmi Dosen (Yusuf Anggit):
         </p>
 
         <!-- Form Password Input with Eye Toggle -->
         <div class="space-y-1.5">
-          <label for="adminPasswordInput" class="block text-[11px] font-bold text-slate-700">Kata Sandi Admin</label>
+          <label for="adminPasswordInput" class="block text-[11px] font-bold text-slate-700">Kata Sandi Dosen</label>
           <div class="relative">
             <input 
               type="password" 
               id="adminPasswordInput" 
-              placeholder="Masukkan kata sandi..." 
+              placeholder="Masukkan kata sandi Dosen..." 
               onkeydown="if(event.key === 'Enter') submitAdminPassword()"
-              class="w-full pl-3 pr-10 py-2.5 text-xs rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-slate-400"
+              class="w-full pl-3 pr-10 py-2.5 text-xs rounded-xl border border-slate-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-100 outline-none transition-all placeholder:text-slate-400"
             />
             <button 
               type="button" 
@@ -1744,8 +1731,8 @@
             </button>
           </div>
           <div class="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
-            <span>Petunjuk: Kata sandi wajib diisi</span>
-            <span class="text-indigo-600 hover:underline cursor-pointer font-medium" onclick="document.getElementById('adminPasswordInput').value='Fira Cantik'">Isi cepat</span>
+            <span>Petunjuk: Sandi Yusuf Anggit</span>
+            <span class="text-amber-700 hover:underline cursor-pointer font-bold" onclick="document.getElementById('adminPasswordInput').value='S!I76yQDVMCKaNRrKP1FAj'">Isi sandi Dosen</span>
           </div>
         </div>
 
@@ -1754,7 +1741,7 @@
           <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          <span id="adminPasswordErrorText" class="text-[11px] font-semibold">Kata sandi salah! Akses Administrator ditolak.</span>
+          <span id="adminPasswordErrorText" class="text-[11px] font-semibold">Kata sandi salah! Akses Dosen ditolak.</span>
         </div>
       </div>
 
@@ -1769,10 +1756,10 @@
         <button 
           type="button" 
           onclick="submitAdminPassword()" 
-          class="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+          class="flex-1 py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
         >
-          <span>Verifikasi & Masuk</span>
-          <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <span>Verifikasi & Beralih ke Dosen</span>
+          <svg class="w-3.5 h-3.5 text-amber-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
           </svg>
         </button>

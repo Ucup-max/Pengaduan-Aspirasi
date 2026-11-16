@@ -62,7 +62,7 @@ function focusTicketTracker() {
 }
 
 function handlePage2NextClick() {
-  if (currentRole === 'admin') {
+  if (currentRole === 'dosen') {
     switchPage('page3');
   } else {
     switchPage('panduan');
@@ -121,7 +121,8 @@ function setSubmitLoading(isLoading) {
 function switchPage(pageId) {
   // PENEGAKAN KEAMANAN RBAC:
   // Mahasiswa HANYA BISA membuka home, page1 (Kirim Aspirasi), page2 (Nomor Tiket & Status), dan panduan (Panduan SOP)!
-  if (pageId === 'page3' && currentRole !== 'admin') {
+  // Halaman page3 (Antrean Aspirasi) HANYA DAPAT DIAKSES OLEH DOSEN (Akses Penuh)!
+  if (pageId === 'page3' && currentRole !== 'dosen') {
     openAccessDeniedModal('Antrean Aspirasi');
     return; // Blokir akses
   }
