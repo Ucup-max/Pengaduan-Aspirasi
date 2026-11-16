@@ -198,7 +198,8 @@
             <input 
               type="text" 
               id="topSearchInput"
-              placeholder="Cari informasi atau nomor tiket..." 
+              placeholder="Cari informasi atau nomor tiket (tekan Enter)..." 
+              onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleGlobalSearch(); }"
               class="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-slate-400"
             />
           </div>
@@ -350,7 +351,7 @@
                 type="text" 
                 id="homeTicketInput" 
                 placeholder="Ketik kode tiket, misal: ASP-000123" 
-                onkeydown="if(event.key === 'Enter') handleQuickLookupTicket()"
+                onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleQuickLookupTicket(); }"
                 class="w-full pl-10 pr-3.5 py-2.5 text-xs font-mono font-bold rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:font-sans placeholder:font-normal placeholder:text-slate-400 uppercase"
               />
             </div>
@@ -882,6 +883,14 @@
                 <span id="p3RecordBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">3 Tiket</span>
               </div>
               <div class="flex items-center gap-2 w-full sm:w-auto">
+                <input 
+                  type="text" 
+                  id="p3SearchInput" 
+                  oninput="renderPage3Table()" 
+                  onkeydown="if(event.key === 'Enter') { event.preventDefault(); renderPage3Table(); }"
+                  placeholder="Cari nomor/nama..." 
+                  class="px-2.5 py-1 text-xs rounded-lg border border-slate-200 bg-white outline-none focus:border-indigo-500 w-full sm:w-40"
+                />
                 <select id="p3FilterStatus" onchange="renderPage3Table()" class="px-2.5 py-1 text-xs rounded-lg border border-slate-200 bg-white">
                   <option value="Semua">Semua Status</option>
                   <option value="Pending">Pending</option>
@@ -1837,12 +1846,74 @@
       }
     }
 
+    /* =========================================================================
+       2B. LOGIKA PENCARIAN TIKET (SMART LOOKUP, ENTER HANDLER & GLOBAL SEARCH)
+       ========================================================================= */
+    function findTicketSmart(query) {
+      if (!query || !ticketsState || ticketsState.length === 0) return null;
+      const q = query.trim().toUpperCase();
+      const qClean = q.replace(/[^A-Z0-9]/g, '');
+
+      return ticketsState.find(t => {
+        const tNum = (t.nomor_tiket || '').toUpperCase();
+        const tNumClean = tNum.replace(/[^A-Z0-9]/g, '');
+
+        // 1. Cocok persis (misal: "ASP-323484" === "ASP-323484")
+        if (tNum === q) return true;
+        // 2. Cocok tanpa tanda strip (misal: "ASP323484" === "ASP-323484")
+        if (tNumClean === qClean) return true;
+        // 3. Cocok nomornya saja jika user ketik angka (misal: "323484" di "ASP-323484")
+        if (qClean.length >= 3 && tNumClean.includes(qClean)) return true;
+        // 4. Substring contains
+        if (tNum.includes(q)) return true;
+        return false;
+      });
+    }
+
+    // Handler untuk input search di Top Header (saat tekan Enter)
+    function handleGlobalSearch() {
+      const input = document.getElementById('topSearchInput');
+      const val = input ? input.value.trim() : '';
+
+      if (!val) {
+        showToast('Ketik nomor tiket atau kata kunci untuk mencari.');
+        if (input) input.focus();
+        return;
+      }
+
+      // 1. Cari nomor tiket dengan smart search
+      const found = findTicketSmart(val);
+      if (found) {
+        populatePage2(found);
+        switchPage('page2');
+        showToast(`Tiket ${found.nomor_tiket} ditemukan! Menampilkan status.`);
+        return;
+      }
+
+      // 2. Cari berdasarkan nama pelapor atau kata kunci kendala
+      const foundKeyword = ticketsState.find(t =>
+        (t.nama_pelapor && t.nama_pelapor.toLowerCase().includes(val.toLowerCase())) ||
+        (t.deskripsi && t.deskripsi.toLowerCase().includes(val.toLowerCase())) ||
+        (t.kategori && t.kategori.toLowerCase().includes(val.toLowerCase()))
+      );
+
+      if (foundKeyword) {
+        populatePage2(foundKeyword);
+        switchPage('page2');
+        showToast(`Ditemukan tiket dari "${foundKeyword.nama_pelapor}" (${foundKeyword.nomor_tiket})`);
+        return;
+      }
+
+      showToast(`Pencarian untuk "${val}" tidak ditemukan.`);
+    }
+
+    // Handler untuk input lacak tiket di Beranda (saat klik atau tekan Enter)
     function handleQuickLookupTicket() {
       const input = document.getElementById('homeTicketInput');
       const err = document.getElementById('homeLookupError');
-      const val = input ? input.value.trim().toUpperCase() : '';
+      const rawVal = input ? input.value.trim() : '';
 
-      if (!val) {
+      if (!rawVal) {
         if (err) {
           err.textContent = 'Silakan masukkan nomor tiket terlebih dahulu.';
           err.classList.remove('hidden');
@@ -1851,18 +1922,18 @@
         return;
       }
 
-      const found = ticketsState.find(t => t.nomor_tiket.toUpperCase() === val);
+      const found = findTicketSmart(rawVal);
       if (found) {
         if (err) err.classList.add('hidden');
         populatePage2(found);
         switchPage('page2');
-        showToast(`Nomor tiket ${found.nomor_tiket} ditemukan! Menampilkan status terkini.`);
+        showToast(`Nomor tiket ${found.nomor_tiket} ditemukan! Menampilkan status.`);
       } else {
         if (err) {
-          err.textContent = `Nomor tiket "${val}" tidak ditemukan dalam sistem. Pastikan format: ASP-XXXXXX.`;
+          err.textContent = `Nomor tiket "${rawVal}" tidak ditemukan dalam sistem. Pastikan format: ASP-XXXXXX.`;
           err.classList.remove('hidden');
         }
-        showToast(`Tiket "${val}" tidak ditemukan.`);
+        showToast(`Tiket "${rawVal}" tidak ditemukan.`);
       }
     }
 
@@ -2208,7 +2279,18 @@
 
       tbody.innerHTML = '';
 
-      const filtered = ticketsState.filter(t => filter === 'Semua' || t.status === filter);
+      const searchInput = document.getElementById('p3SearchInput');
+      const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+      const filtered = ticketsState.filter(t => {
+        const matchStatus = (filter === 'Semua' || t.status === filter);
+        const matchSearch = !searchVal ||
+          (t.nomor_tiket && t.nomor_tiket.toLowerCase().includes(searchVal)) ||
+          (t.nama_pelapor && t.nama_pelapor.toLowerCase().includes(searchVal)) ||
+          (t.kategori && t.kategori.toLowerCase().includes(searchVal)) ||
+          (t.deskripsi && t.deskripsi.toLowerCase().includes(searchVal));
+        return matchStatus && matchSearch;
+      });
       countBadge.textContent = `${filtered.length} Tiket`;
 
       filtered.forEach(item => {
