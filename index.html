@@ -2057,34 +2057,48 @@
 
       setSubmitLoading(true);
 
-      const newTicket = {
-        id: Date.now(),
+      const ticketPayload = {
         nomor_tiket,
         nama_pelapor,
         kategori,
         deskripsi,
-        status: 'Pending',
-        created_at: new Date().toISOString()
+        status: 'Pending'
       };
+
+      let savedTicket = null;
 
       try {
         if (isCloudMode && supabaseClient) {
-          const { error } = await supabaseClient
+          // Jangan kirim "id" ke Supabase karena kolom "id" adalah GENERATED ALWAYS AS IDENTITY di PostgreSQL
+          const { data, error } = await supabaseClient
             .from('tickets')
-            .insert([newTicket]);
+            .insert([ticketPayload])
+            .select();
+
           if (error) throw error;
+          savedTicket = (data && data.length) ? data[0] : { id: Date.now(), ...ticketPayload, created_at: new Date().toISOString() };
+          ticketsState.unshift(savedTicket);
         } else {
-          ticketsState.unshift(newTicket);
+          savedTicket = {
+            id: Date.now(),
+            ...ticketPayload,
+            created_at: new Date().toISOString()
+          };
+          ticketsState.unshift(savedTicket);
           saveLocalStorage(ticketsState);
         }
 
         // Tampilkan data pada PAGE 2
-        populatePage2(newTicket);
+        populatePage2(savedTicket);
         updateDashboardStats();
 
         // TRANSISI OTOMATIS DARI PAGE 1 KE PAGE 2!
         switchPage('page2');
         showToast('Aspirasi berhasil dikirim dan terdaftar!');
+
+        // Bersihkan form
+        document.getElementById('deskripsi').value = '';
+        document.getElementById('charCount').textContent = '0 karakter';
 
         // Siapkan nomor baru untuk form selanjutnya
         setTimeout(generateNewTicketId, 500);
