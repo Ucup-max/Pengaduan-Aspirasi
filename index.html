@@ -758,37 +758,37 @@
 
               <!-- Stepper Timeline -->
               <div class="grid grid-cols-3 gap-2 text-center pt-1">
-                <!-- Step 1: Pending (Active) -->
-                <div class="flex flex-col items-center">
+                <!-- Step 1: Pending -->
+                <div class="flex flex-col items-center transition-all duration-200" id="step-pending-box">
                   <div id="step-pending-icon" class="w-9 h-9 rounded-full bg-slate-900 text-amber-400 flex items-center justify-center mb-1.5 shadow-xs">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
                     </svg>
                   </div>
-                  <span class="text-xs font-bold text-slate-900">Pending</span>
+                  <span id="step-pending-title" class="text-xs font-bold text-slate-900">Pending</span>
                   <span id="step-pending-badge" class="text-[10px] font-semibold text-amber-600 mt-0.5">Tahap Aktif</span>
                 </div>
 
                 <!-- Step 2: Diproses -->
-                <div class="flex flex-col items-center opacity-40" id="step-diproses-box">
-                  <div id="step-diproses-icon" class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-1.5 border border-slate-200">
+                <div class="flex flex-col items-center opacity-30 transition-all duration-200" id="step-diproses-box">
+                  <div id="step-diproses-icon" class="w-9 h-9 rounded-full bg-slate-100/80 text-slate-300 flex items-center justify-center mb-1.5 border border-slate-200/60 shadow-none">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                     </svg>
                   </div>
-                  <span class="text-xs font-bold text-slate-700">Diproses</span>
-                  <span class="text-[10px] text-slate-400 mt-0.5">Pemeriksaan</span>
+                  <span id="step-diproses-title" class="text-xs font-medium text-slate-400">Diproses</span>
+                  <span id="step-diproses-badge" class="text-[10px] text-slate-300 mt-0.5">Pemeriksaan</span>
                 </div>
 
                 <!-- Step 3: Selesai -->
-                <div class="flex flex-col items-center opacity-40" id="step-selesai-box">
-                  <div id="step-selesai-icon" class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-1.5 border border-slate-200">
+                <div class="flex flex-col items-center opacity-30 transition-all duration-200" id="step-selesai-box">
+                  <div id="step-selesai-icon" class="w-9 h-9 rounded-full bg-slate-100/80 text-slate-300 flex items-center justify-center mb-1.5 border border-slate-200/60 shadow-none">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                   </div>
-                  <span class="text-xs font-bold text-slate-700">Selesai</span>
-                  <span class="text-[10px] text-slate-400 mt-0.5">Tuntas</span>
+                  <span id="step-selesai-title" class="text-xs font-medium text-slate-400">Selesai</span>
+                  <span id="step-selesai-badge" class="text-[10px] text-slate-300 mt-0.5">Tuntas</span>
                 </div>
               </div>
             </div>
@@ -2246,26 +2246,80 @@
     }
 
     function updateStepperDisplay(status) {
+      // Step 1: Pending
+      const pendingBox = document.getElementById('step-pending-box');
+      const pendingIcon = document.getElementById('step-pending-icon');
+      const pendingTitle = document.getElementById('step-pending-title');
+      const pendingBadge = document.getElementById('step-pending-badge');
+
+      // Step 2: Diproses
       const diprosesBox = document.getElementById('step-diproses-box');
       const diprosesIcon = document.getElementById('step-diproses-icon');
+      const diprosesTitle = document.getElementById('step-diproses-title');
+      const diprosesBadge = document.getElementById('step-diproses-badge');
+
+      // Step 3: Selesai
       const selesaiBox = document.getElementById('step-selesai-box');
       const selesaiIcon = document.getElementById('step-selesai-icon');
+      const selesaiTitle = document.getElementById('step-selesai-title');
+      const selesaiBadge = document.getElementById('step-selesai-badge');
+
+      // Helper untuk membuat step inaktif menjadi warna abu-abu (persis foto ke-2)
+      const setInactive = (box, icon, title, badge, badgeText) => {
+        if (box) box.className = 'flex flex-col items-center opacity-30 transition-all duration-200';
+        if (icon) icon.className = 'w-9 h-9 rounded-full bg-slate-100/80 text-slate-300 flex items-center justify-center mb-1.5 border border-slate-200/60 shadow-none';
+        if (title) title.className = 'text-xs font-medium text-slate-400';
+        if (badge) {
+          badge.className = 'text-[10px] text-slate-300 mt-0.5';
+          badge.textContent = badgeText;
+        }
+      };
 
       if (status === 'Pending') {
-        diprosesBox.classList.add('opacity-40');
-        diprosesIcon.className = 'w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-1.5 border border-slate-200';
-        selesaiBox.classList.add('opacity-40');
-        selesaiIcon.className = 'w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-1.5 border border-slate-200';
+        // Step 1 AKTIF
+        if (pendingBox) pendingBox.className = 'flex flex-col items-center opacity-100 transition-all duration-200';
+        if (pendingIcon) pendingIcon.className = 'w-9 h-9 rounded-full bg-slate-900 text-amber-400 flex items-center justify-center mb-1.5 shadow-xs border-transparent';
+        if (pendingTitle) pendingTitle.className = 'text-xs font-bold text-slate-900';
+        if (pendingBadge) {
+          pendingBadge.className = 'text-[10px] font-semibold text-amber-600 mt-0.5';
+          pendingBadge.textContent = 'Tahap Aktif';
+        }
+
+        // Step 2 & 3 ABU-ABU PERSIS FOTO 2
+        setInactive(diprosesBox, diprosesIcon, diprosesTitle, diprosesBadge, 'Pemeriksaan');
+        setInactive(selesaiBox, selesaiIcon, selesaiTitle, selesaiBadge, 'Tuntas');
+
       } else if (status === 'Diproses') {
-        diprosesBox.classList.remove('opacity-40');
-        diprosesIcon.className = 'w-9 h-9 rounded-full bg-sky-600 text-white flex items-center justify-center mb-1.5 shadow-xs';
-        selesaiBox.classList.add('opacity-40');
-        selesaiIcon.className = 'w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-1.5 border border-slate-200';
+        // Step 1 ABU-ABU
+        setInactive(pendingBox, pendingIcon, pendingTitle, pendingBadge, 'Menunggu');
+
+        // Step 2 AKTIF
+        if (diprosesBox) diprosesBox.className = 'flex flex-col items-center opacity-100 transition-all duration-200';
+        if (diprosesIcon) diprosesIcon.className = 'w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center mb-1.5 shadow-xs border-transparent';
+        if (diprosesTitle) diprosesTitle.className = 'text-xs font-bold text-slate-900';
+        if (diprosesBadge) {
+          diprosesBadge.className = 'text-[10px] font-semibold text-emerald-600 mt-0.5';
+          diprosesBadge.textContent = 'Tahap Aktif';
+        }
+
+        // Step 3 ABU-ABU
+        setInactive(selesaiBox, selesaiIcon, selesaiTitle, selesaiBadge, 'Tuntas');
+
       } else if (status === 'Selesai') {
-        diprosesBox.classList.remove('opacity-40');
-        diprosesIcon.className = 'w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center mb-1.5 shadow-xs';
-        selesaiBox.classList.remove('opacity-40');
-        selesaiIcon.className = 'w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center mb-1.5 shadow-xs';
+        // Step 1 ABU-ABU
+        setInactive(pendingBox, pendingIcon, pendingTitle, pendingBadge, 'Menunggu');
+
+        // Step 2 ABU-ABU
+        setInactive(diprosesBox, diprosesIcon, diprosesTitle, diprosesBadge, 'Pemeriksaan');
+
+        // Step 3 AKTIF
+        if (selesaiBox) selesaiBox.className = 'flex flex-col items-center opacity-100 transition-all duration-200';
+        if (selesaiIcon) selesaiIcon.className = 'w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center mb-1.5 shadow-xs border-transparent';
+        if (selesaiTitle) selesaiTitle.className = 'text-xs font-bold text-slate-900';
+        if (selesaiBadge) {
+          selesaiBadge.className = 'text-[10px] font-semibold text-emerald-600 mt-0.5';
+          selesaiBadge.textContent = 'Tuntas';
+        }
       }
     }
 
