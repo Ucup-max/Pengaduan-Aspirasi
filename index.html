@@ -1528,35 +1528,7 @@
     let ticketsState = [];
     let currentSelectedTicket = null;
 
-    const initialTicketsData = [
-      {
-        id: 1,
-        nomor_tiket: 'ASP-000123',
-        nama_pelapor: 'Ahmad Fauzi',
-        kategori: 'Sarana & Prasarana',
-        deskripsi: 'Proyektor di ruang Lab Komputer 3 tidak memancarkan layar dan kabel HDMI longgar sehingga kegiatan perkuliahan terganggu.',
-        status: 'Pending',
-        created_at: new Date(Date.now() - 3600000 * 5).toISOString()
-      },
-      {
-        id: 2,
-        nomor_tiket: 'ASP-000122',
-        nama_pelapor: 'Siti Rahmawati',
-        kategori: 'Layanan Akademik',
-        deskripsi: 'Pengajuan revisi KRS semester ganjil belum diverifikasi oleh dosen wali sejak 3 hari yang lalu.',
-        status: 'Diproses',
-        created_at: new Date(Date.now() - 3600000 * 24).toISOString()
-      },
-      {
-        id: 3,
-        nomor_tiket: 'ASP-000121',
-        nama_pelapor: 'Dimas Aditya',
-        kategori: 'Fasilitas Umum & Sanitasi',
-        deskripsi: 'AC di Gedung C lantai 2 bocor dan mengeluarkan tetesan air ke lantai koridor membahayakan pejalan kaki.',
-        status: 'Selesai',
-        created_at: new Date(Date.now() - 3600000 * 48).toISOString()
-      }
-    ];
+    const initialTicketsData = [];
 
     function generateNewTicketId() {
       const randomNum = Math.floor(100000 + Math.random() * 900000);
@@ -2280,20 +2252,41 @@
       });
 
       // Default pilih tiket pertama jika belum ada yang terpilih
-      if (!currentSelectedTicket && filtered.length > 0) {
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-slate-400 text-xs">
+              Belum ada data aspirasi pada sistem.
+            </td>
+          </tr>
+        `;
+        selectTicketForPage3(null);
+      } else if (!currentSelectedTicket && filtered.length > 0) {
         selectTicketForPage3(filtered[0]);
       }
     }
 
     function selectTicketForPage3(ticket) {
       currentSelectedTicket = ticket;
+      const badge = document.getElementById('p3DetailStatusBadge');
+      if (!ticket) {
+        document.getElementById('p3DetailNomor').textContent = '-';
+        document.getElementById('p3DetailPelapor').textContent = '-';
+        document.getElementById('p3DetailKategori').textContent = '-';
+        document.getElementById('p3DetailDeskripsi').textContent = 'Belum ada data aspirasi yang dipilih.';
+        document.getElementById('p3SelectStatus').value = 'Pending';
+        if (badge) {
+          badge.textContent = '-';
+          badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200';
+        }
+        return;
+      }
       document.getElementById('p3DetailNomor').textContent = ticket.nomor_tiket;
       document.getElementById('p3DetailPelapor').textContent = ticket.nama_pelapor;
       document.getElementById('p3DetailKategori').textContent = ticket.kategori;
       document.getElementById('p3DetailDeskripsi').textContent = ticket.deskripsi;
       document.getElementById('p3SelectStatus').value = ticket.status;
 
-      const badge = document.getElementById('p3DetailStatusBadge');
       badge.textContent = ticket.status;
       if (ticket.status === 'Pending') {
         badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200';
@@ -2363,7 +2356,7 @@
           statusText.textContent = 'Cloud Supabase Active';
 
           const { data } = await supabaseClient.from('tickets').select('*').order('created_at', { ascending: false });
-          ticketsState = data && data.length ? data : loadStorage();
+          ticketsState = Array.isArray(data) ? data : loadStorage();
         } catch (err) {
           isCloudMode = false;
           ticketsState = loadStorage();
@@ -2439,16 +2432,28 @@
       showToast('Payload XSS telah diisikan ke form. Klik "Kirim Aspirasi" untuk membuktikan ketahanan Anti-XSS!');
     }
 
-    function resetDataSimulasi() {
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-      localStorage.removeItem('ASPIRASI_PENPOT_TICKETS_V1');
-      ticketsState = JSON.parse(JSON.stringify(initialTicketsData));
-      saveLocalStorage(ticketsState);
-      updateDashboardStats();
-      if (document.getElementById('view-page3') && !document.getElementById('view-page3').classList.contains('hidden')) {
-        renderPage3Table();
+    async function resetDataSimulasi() {
+      if (confirm('Apakah Anda yakin ingin mengosongkan seluruh data aspirasi menjadi 0?')) {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        localStorage.removeItem('ASPIRASI_PENPOT_TICKETS_V1');
+        ticketsState = [];
+        saveLocalStorage(ticketsState);
+
+        if (isCloudMode && supabaseClient) {
+          try {
+            await supabaseClient.from('tickets').delete().neq('id', 0);
+          } catch (e) {
+            console.warn('Gagal reset di Supabase Cloud:', e);
+          }
+        }
+
+        currentSelectedTicket = null;
+        updateDashboardStats();
+        if (document.getElementById('view-page3') && !document.getElementById('view-page3').classList.contains('hidden')) {
+          renderPage3Table();
+        }
+        showToast('Seluruh data aspirasi berhasil direset menjadi 0!');
       }
-      showToast('Data simulasi berhasil direset ke data awal kampus!');
     }
 
     document.addEventListener('DOMContentLoaded', initSystem);
