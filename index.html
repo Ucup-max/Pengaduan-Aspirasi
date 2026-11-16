@@ -1,35 +1,29 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistem Pengaduan dan Aspirasi - Help Desk Ticket</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aspirasi Mahasiswa - Portal Pengaduan Kampus</title>
 
-  <!-- 1. Google Fonts: Plus Jakarta Sans -->
+  <!-- Google Fonts: Plus Jakarta Sans / Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- 2. Tailwind CSS CDN -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
           },
           colors: {
             brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              500: '#6366f1',
-              600: '#4f46e5',
-              700: '#4338ca',
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              900: '#0f172a',
             }
           }
         }
@@ -37,985 +31,2427 @@
     }
   </script>
 
-  <!-- 3. Supabase JS SDK v2 CDN -->
+  <!-- Supabase JS SDK v2 CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+<body class="bg-[#f8fafc] text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-<body
-  class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+  <!-- ================= LAYOUT WRAPPER ================= -->
+  <div class="flex-1 flex flex-col md:flex-row min-h-screen w-full">
 
-  <!-- Top Announcement / Mode Banner -->
-  <div id="connectionBanner"
-    class="bg-amber-500 text-white text-xs font-medium py-2 px-4 shadow-sm transition-all duration-300">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-      <div class="flex items-center gap-2">
-        <span class="flex h-2 w-2 relative">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-200 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-        </span>
-        <span id="bannerText"><strong>Mode Demo Lokal Aktif:</strong> Data tersimpan di <code>localStorage</code>
-          browser. Untuk menghubungkan ke Cloud Supabase, ganti <code>SUPABASE_URL</code> dan
-          <code>SUPABASE_ANON_KEY</code> di dalam file <code>index.html</code>.</span>
-      </div>
-      <button onclick="toggleConfigModal()"
-        class="text-xs bg-amber-600 hover:bg-amber-700 px-2.5 py-1 rounded text-white font-semibold transition shrink-0">
-        Panduan Supabase
-      </button>
-    </div>
-  </div>
-
-  <!-- Header Navigation Bar (Sesuai Penpot Design) -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div
-          class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white shadow-sm shadow-indigo-200">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-base font-bold text-slate-900 leading-tight">Pengaduan &amp; Aspirasi</h1>
-            <span
-              class="hidden md:inline-flex text-[11px] font-medium bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200">Help
-              Desk Ticket</span>
+    <!-- ================= SIDEBAR NAVIGASI (PERSIS DESAIN PENPOT) ================= -->
+    <aside class="w-full md:w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 shadow-xs z-20">
+      <div>
+        <!-- Brand Logo & Header -->
+        <div class="p-5 border-b border-slate-100 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
           </div>
-          <p class="text-xs text-slate-500">Layanan Publik Resmi &amp; Penanganan Kendala Terpadu</p>
-        </div>
-      </div>
-
-      <!-- Right Header Actions & Live Status Badge -->
-      <div class="flex items-center gap-3">
-        <div id="statusBadge"
-          class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 transition-all">
-          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-          <span id="statusBadgeText">Local Demo Mode</span>
-        </div>
-        <button onclick="window.location.reload()" title="Refresh Data"
-          class="p-2 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Content Workspace -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
-
-    <!-- 3 Summary / KPI Cards (Top Metrics Sesuai SKPL & Penpot) -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
-      <!-- Card 1: Total Tiket Masuk -->
-      <div
-        class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex items-center justify-between hover:border-slate-300 transition">
-        <div>
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Laporan Masuk</p>
-          <h3 id="statTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">0</h3>
-          <p class="text-xs text-indigo-600 font-medium mt-1">Seluruh tiket terdaftar</p>
-        </div>
-        <div
-          class="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        </div>
-      </div>
-
-      <!-- Card 2: Tiket Dalam Penanganan (Pending & Diproses) -->
-      <div
-        class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex items-center justify-between hover:border-slate-300 transition">
-        <div>
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Dalam Penanganan</p>
-          <h3 id="statProses" class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-1">0</h3>
-          <p class="text-xs text-amber-600 font-medium mt-1">Status: Pending &amp; Diproses</p>
-        </div>
-        <div
-          class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-      </div>
-
-      <!-- Card 3: Tiket Selesai -->
-      <div
-        class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex items-center justify-between hover:border-slate-300 transition">
-        <div>
-          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Laporan Selesai</p>
-          <h3 id="statSelesai" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-1">0</h3>
-          <p class="text-xs text-emerald-600 font-medium mt-1">Telah diselesaikan petugas</p>
-        </div>
-        <div
-          class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-      </div>
-    </section>
-
-    <!-- Panel Simulasi Pengujian 1-Klik (QA & Security Helper Bar) -->
-    <section class="bg-indigo-50/70 border border-indigo-200/80 rounded-xl p-4">
-      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
-        <div class="flex items-center gap-2">
-          <span
-            class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-indigo-600 text-white text-xs font-bold">QA</span>
           <div>
-            <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-900">Panel Uji Cepat SKPL (QA &amp;
-              Security Mode)</h4>
-            <p class="text-xs text-indigo-700">Verifikasi otomatis skenario Black Box Testing &amp; ketahanan Anti-XSS
+            <h1 class="text-sm font-bold text-slate-900 leading-tight">Aspirasi Mahasiswa</h1>
+            <p class="text-[11px] text-slate-400 font-medium">Portal Pengaduan Kampus</p>
+          </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="p-3 space-y-1">
+          <!-- Item 0: Beranda / Dashboard (Page Home) -->
+          <button 
+            type="button" 
+            onclick="switchPage('home')" 
+            id="nav-home" 
+            class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all bg-slate-900 text-white shadow-xs cursor-pointer"
+          >
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+              </svg>
+              <span>Beranda</span>
+            </div>
+          </button>
+
+          <!-- Item 1: Form Aspirasi (Page 1) -->
+          <button 
+            type="button" 
+            onclick="switchPage('page1')" 
+            id="nav-page1" 
+            class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer"
+          >
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+              <span>Kirim Aspirasi</span>
+            </div>
+          </button>
+
+          <!-- Item 2: Nomor Tiket & Status (Page 2) -->
+          <button 
+            type="button" 
+            onclick="switchPage('page2')" 
+            id="nav-page2" 
+            class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer"
+          >
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>Nomor Tiket & Status</span>
+            </div>
+          </button>
+
+          <!-- Item 3: Antrean Aspirasi (Page 3 - KHUSUS ROLE ADMIN) -->
+          <button 
+            type="button" 
+            onclick="switchPage('page3')" 
+            id="nav-page3" 
+            class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer group"
+          >
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+              </svg>
+              <span>Antrean Aspirasi</span>
+            </div>
+            <!-- Badge Lock / Admin indicator -->
+            <span id="navLockBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1">
+              <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+              </svg>
+              <span>Khusus Admin</span>
+            </span>
+          </button>
+
+          <!-- Item 4: Panduan & SOP -->
+          <div class="pt-4 pb-1 px-3">
+            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Informasi</span>
+          </div>
+          <button 
+            type="button" 
+            onclick="switchPage('panduan')" 
+            id="nav-panduan" 
+            class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer"
+          >
+            <div class="flex items-center gap-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span>Panduan & SOP</span>
+            </div>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Bottom User & RBAC Role Switcher Box -->
+      <div class="p-3.5 border-t border-slate-200/80 bg-slate-50/70 space-y-2.5">
+        <!-- RBAC Switcher Header -->
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Mode Peran (RBAC)</span>
+          <span id="roleBadgeIndicator" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+            Mahasiswa
+          </span>
+        </div>
+
+        <!-- Role Selector Dropdown -->
+        <div class="relative">
+          <select 
+            id="roleSelector" 
+            onchange="handleRoleSwitch(this.value)" 
+            class="w-full pl-2.5 pr-8 py-1.5 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-800 shadow-2xs focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
+          >
+            <option value="mahasiswa">🎓 Mahasiswa (Pelapor)</option>
+            <option value="admin">🛡️ Admin (Petugas Help Desk)</option>
+          </select>
+        </div>
+
+        <!-- User Profile Card -->
+        <div class="flex items-center gap-2.5 pt-1">
+          <div id="userAvatar" class="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs shrink-0">
+            M
+          </div>
+          <div class="overflow-hidden flex-1">
+            <p id="userNameDisplay" class="text-xs font-bold text-slate-900 truncate">Mahasiswa</p>
+            <p id="userRoleDesc" class="text-[10px] text-slate-400 truncate">Pelapor • Sivitas Kampus</p>
+          </div>
+        </div>
+
+        <div class="pt-1.5 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-slate-400">
+          <span onclick="openContactModal()" class="hover:text-slate-600 cursor-pointer">Bantuan & Kontak</span>
+          <span onclick="toggleRoleQA()" class="hover:text-indigo-600 cursor-pointer text-indigo-600 font-semibold" title="Klik untuk beralih peran">Ganti Role ⇄</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ================= KONTEN UTAMA (HEADER & PAGE VIEWS) ================= -->
+    <div class="flex-1 flex flex-col overflow-y-auto">
+
+      <!-- TOP HEADER SEARCH & STATUS BAR -->
+      <header class="bg-white border-b border-slate-200 px-6 py-3 flex flex-col md:flex-row items-center justify-between gap-3 sticky top-0 z-10">
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          <!-- Search Bar -->
+          <div class="relative w-full sm:w-72">
+            <svg class="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <input 
+              type="text" 
+              id="topSearchInput"
+              placeholder="Cari informasi atau nomor tiket..." 
+              class="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-slate-400"
+            />
+          </div>
+
+          <!-- Quick Role Switcher Buttons (Interaktif 1-Klik) -->
+          <div class="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 self-start sm:self-auto shrink-0">
+            <button 
+              type="button" 
+              id="toggleHeaderMahasiswa" 
+              onclick="handleRoleSwitch('mahasiswa')" 
+              class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs bg-indigo-600 text-white"
+              title="Beralih ke peran Mahasiswa"
+            >
+              <span>🎓</span>
+              <span>Mahasiswa</span>
+            </button>
+            <button 
+              type="button" 
+              id="toggleHeaderAdmin" 
+              onclick="handleRoleSwitch('admin')" 
+              class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900"
+              title="Beralih ke peran Admin Help Desk"
+            >
+              <span>🛡️</span>
+              <span>Admin</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Connection Indicator, RBAC Badge & Profile -->
+        <div class="flex items-center gap-2.5 self-end md:self-auto">
+          <!-- RBAC Role Pill -->
+          <div id="topHeaderRoleBadge" class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+            <span id="topHeaderRoleDot" class="w-1.5 h-1.5 rounded-full bg-indigo-600"></span>
+            <span id="topHeaderRoleText">Role: Mahasiswa</span>
+          </div>
+
+          <!-- Connection Status Badge -->
+          <div id="connectionStatusBadge" class="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <span id="connectionStatusText">Local Demo Mode</span>
+          </div>
+
+          <!-- Notification Bell -->
+          <button type="button" onclick="showToast('Tidak ada notifikasi baru')" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center hover:bg-slate-50 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- NOTIFIKASI BANNER MODE ADMIN AKTIF -->
+      <div id="adminModeBanner" class="hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs animate-in slide-in-from-top duration-200">
+        <div class="flex items-center gap-2.5 font-medium">
+          <span class="px-2 py-0.5 rounded bg-emerald-800/90 font-bold text-[10px] tracking-wide uppercase shrink-0">Admin Aktif</span>
+          <span>Anda login sebagai <strong>Administrator Help Desk</strong>. Memiliki wewenang penuh membuka <strong>Antrean Aspirasi</strong> dan memperbarui status tiket.</span>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button type="button" onclick="switchPage('page3')" class="px-3 py-1 rounded-lg bg-white text-emerald-900 font-bold hover:bg-emerald-50 transition-colors text-xs shadow-xs cursor-pointer">
+            Kelola Antrean Tiket →
+          </button>
+          <button type="button" onclick="handleRoleSwitch('mahasiswa')" class="px-3 py-1 rounded-lg bg-emerald-800/90 hover:bg-emerald-900 text-white font-medium transition-colors text-xs cursor-pointer">
+            Kembali ke Mahasiswa
+          </button>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           BERANDA / DASHBOARD UTAMA (PORTAL ASPIRASI MAHASISWA)
+           ========================================================================= -->
+      <section id="view-home" class="page-view p-6 sm:p-8 max-w-5xl mx-auto w-full space-y-8 animate-in fade-in duration-300">
+
+        <!-- 1. HERO BANNER INTERAKTIF -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white p-7 sm:p-10 shadow-lg border border-slate-800">
+          <div class="relative z-10 max-w-2xl space-y-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[11px] font-bold text-indigo-300">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>PORTAL LAYANAN RESMI MAHASISWA</span>
+            </div>
+            
+            <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+              Suarakan Aspirasi, Wujudkan Kampus yang Lebih Baik.
+            </h2>
+            
+            <p class="text-xs sm:text-sm text-slate-300/90 leading-relaxed">
+              Sampaikan kendala fasilitas, layanan akademik, atau masukan konstruktif secara terpusat, transparan, dan terverifikasi dalam batas waktu 1x24 jam kerja.
+            </p>
+
+            <div class="pt-2 flex flex-wrap items-center gap-3">
+              <button 
+                type="button" 
+                onclick="switchPage('page1')" 
+                class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md hover:shadow-indigo-500/25 transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <span>✍️ Buat Aspirasi Baru</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </button>
+
+              <button 
+                type="button" 
+                onclick="focusTicketTracker()" 
+                class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/15 text-xs font-bold backdrop-blur-xs transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <span>Lacak Status Tiket</span>
+              </button>
+
+              <button 
+                type="button" 
+                onclick="switchPage('panduan')" 
+                class="px-4 py-3 rounded-xl text-slate-300 hover:text-white text-xs font-medium transition-colors cursor-pointer"
+              >
+                Baca Panduan & SOP →
+              </button>
+            </div>
+          </div>
+
+          <!-- Decorative subtle graphic elements in background -->
+          <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute right-8 top-8 opacity-10 hidden sm:block pointer-events-none">
+            <svg class="w-48 h-48 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 2. WIDGET PELACAK TIKET CEPAT (QUICK TICKET LOOKUP) -->
+        <div id="homeTicketTracker" class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 sm:p-6 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-black">#</span>
+                <span>Lacak Status Tiket Anda</span>
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">Sudah pernah mengajukan aspirasi? Masukkan nomor tiket untuk melihat progres penanganan secara langsung.</p>
+            </div>
+            <span class="text-[10px] font-mono font-bold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100 self-start sm:self-auto">
+              FORMAT: ASP-XXXXXX
+            </span>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center gap-2.5 pt-1">
+            <div class="relative flex-1 w-full">
+              <svg class="w-4 h-4 absolute left-3.5 top-3 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+              </svg>
+              <input 
+                type="text" 
+                id="homeTicketInput" 
+                placeholder="Ketik kode tiket, misal: ASP-000123" 
+                onkeydown="if(event.key === 'Enter') handleQuickLookupTicket()"
+                class="w-full pl-10 pr-3.5 py-2.5 text-xs font-mono font-bold rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:font-sans placeholder:font-normal placeholder:text-slate-400 uppercase"
+              />
+            </div>
+            <button 
+              type="button" 
+              onclick="handleQuickLookupTicket()" 
+              class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
+            >
+              <span>Periksa Status</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+          </div>
+          <p id="homeLookupError" class="hidden text-xs font-semibold text-rose-600 pt-0.5">
+            Nomor tiket tidak ditemukan. Pastikan format nomor tiket benar (contoh: ASP-000123).
+          </p>
+        </div>
+
+        <!-- 3. KARTU STATISTIK & TRANSPARANSI LAYANAN KAMPUS -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Transparansi & Metrik Penanganan</h3>
+            </div>
+            <span class="text-[10px] text-slate-400">Pembaruan otomatis real-time</span>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <!-- Card 1: Total Tiket -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-semibold text-slate-500">Total Aspirasi</span>
+                <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </span>
+              </div>
+              <p id="statTotalTickets" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">3</p>
+              <p class="text-[10px] text-slate-400 mt-1">Laporan resmi masuk</p>
+            </div>
+
+            <!-- Card 2: Diproses -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-semibold text-slate-500">Sedang Ditangani</span>
+                <span class="w-6 h-6 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </span>
+              </div>
+              <p id="statDiprosesTickets" class="text-2xl sm:text-3xl font-extrabold text-sky-600 tracking-tight">1</p>
+              <p class="text-[10px] text-slate-400 mt-1">Dalam pengerjaan teknis</p>
+            </div>
+
+            <!-- Card 3: Selesai -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-semibold text-slate-500">Tuntas Diselesaikan</span>
+                <span class="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </span>
+              </div>
+              <p id="statSelesaiTickets" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 tracking-tight">1</p>
+              <p class="text-[10px] text-slate-400 mt-1">Solusi terverifikasi</p>
+            </div>
+
+            <!-- Card 4: SLA Waktu Tanggap -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-xs">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-semibold text-slate-500">Standar Waktu SLA</span>
+                <span class="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </span>
+              </div>
+              <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">&le; 24 Jam</p>
+              <p class="text-[10px] text-slate-400 mt-1">Respon awal help desk</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. PEMILIH KATEGORI CEPAT (QUICK CATEGORY SELECTOR) -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Pilih Kategori Kendala</h3>
+            </div>
+            <span class="text-[11px] text-indigo-600 font-semibold cursor-pointer hover:underline" onclick="switchPage('page1')">Lihat Formulir Lengkap →</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <!-- Box 1: Sarana & Prasarana -->
+            <div 
+              onclick="quickSelectCategoryAndReport('Sarana & Prasarana')" 
+              class="bg-white rounded-2xl border border-slate-200 p-4 hover:border-indigo-400 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+              </div>
+              <h4 class="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">Sarana & Prasarana</h4>
+              <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">AC rusak, proyektor mati, kursi kuliah, kelistrikan kelas.</p>
+              <span class="text-[10px] text-indigo-600 font-bold mt-2.5 inline-flex items-center gap-1">Lapor Kategori Ini &rarr;</span>
+            </div>
+
+            <!-- Box 2: Teknologi & Informasi -->
+            <div 
+              onclick="quickSelectCategoryAndReport('Teknologi & Informasi')" 
+              class="bg-white rounded-2xl border border-slate-200 p-4 hover:border-sky-400 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              </div>
+              <h4 class="text-xs font-bold text-slate-900 group-hover:text-sky-600 transition-colors">Teknologi & Informasi</h4>
+              <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">WiFi lambat/putus, server SIAKAD, lab komputer, email kampus.</p>
+              <span class="text-[10px] text-sky-600 font-bold mt-2.5 inline-flex items-center gap-1">Lapor Kategori Ini &rarr;</span>
+            </div>
+
+            <!-- Box 3: Layanan Akademik -->
+            <div 
+              onclick="quickSelectCategoryAndReport('Akademik')" 
+              class="bg-white rounded-2xl border border-slate-200 p-4 hover:border-emerald-400 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+              </div>
+              <h4 class="text-xs font-bold text-slate-900 group-hover:text-emerald-600 transition-colors">Layanan Akademik</h4>
+              <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">Verifikasi KRS, sinkronisasi nilai, jadwal ujian, dosen wali.</p>
+              <span class="text-[10px] text-emerald-600 font-bold mt-2.5 inline-flex items-center gap-1">Lapor Kategori Ini &rarr;</span>
+            </div>
+
+            <!-- Box 4: Fasilitas Kampus & Kebersihan -->
+            <div 
+              onclick="quickSelectCategoryAndReport('Fasilitas Kampus')" 
+              class="bg-white rounded-2xl border border-slate-200 p-4 hover:border-amber-400 hover:shadow-md transition-all cursor-pointer group"
+            >
+              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              </div>
+              <h4 class="text-xs font-bold text-slate-900 group-hover:text-amber-600 transition-colors">Fasilitas Kampus</h4>
+              <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">Sanitasi toilet, lift gedung kuliah, penerangan jalan, parkir.</p>
+              <span class="text-[10px] text-amber-600 font-bold mt-2.5 inline-flex items-center gap-1">Lapor Kategori Ini &rarr;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. TIKET YANG BARU TUNTAS DISELESAIKAN (RECENT RESOLVED ISSUES) -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Daftar Aspirasi Tuntas Terkini</h3>
+            </div>
+            <span class="text-[10px] text-slate-400">Bukti penanganan nyata</span>
+          </div>
+
+          <div id="homeRecentResolvedList" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <!-- Diisi secara dinamis oleh updateDashboardStats() -->
+          </div>
+        </div>
+
+        <!-- 6. ALUR 3 LANGKAH SISTEM -->
+        <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 sm:p-6 space-y-3">
+          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide">3 Langkah Penanganan Aspirasi</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1 text-xs">
+            <div class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-[11px] shrink-0">1</span>
+              <div>
+                <p class="font-bold text-slate-800">Isi Formulir</p>
+                <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">Tuliskan kendala lokasi dan rincian masalah secara jelas.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-sky-600 text-white flex items-center justify-center font-bold text-[11px] shrink-0">2</span>
+              <div>
+                <p class="font-bold text-slate-800">Simpan Nomor Tiket</p>
+                <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">Gunakan kode unik (contoh: ASP-000123) untuk melacak status.</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[11px] shrink-0">3</span>
+              <div>
+                <p class="font-bold text-slate-800">Penyelesaian Kendala</p>
+                <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">Staf & teknisi melakukan tindakan perbaikan lapangan.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- =========================================================================
+           PAGE 1: FORM ASPIRASI (PERSIS DESAIN BOARD 1 PENPOT)
+           ========================================================================= -->
+      <section id="view-page1" class="page-view hidden p-6 sm:p-8 max-w-4xl mx-auto w-full space-y-6">
+
+        <!-- Breadcrumbs & Procedure Label -->
+        <div>
+          <p class="text-[11px] uppercase tracking-wider font-semibold text-slate-400">
+            PORTAL LAYANAN MAHASISWA &nbsp;/&nbsp; <span class="text-indigo-600 font-bold">FORMULIR PENGADUAN</span>
+          </p>
+          <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">Form Aspirasi</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Sampaikan laporan atau aspirasi Anda secara teratur dan transparan.</p>
+        </div>
+
+        <!-- Institutional Civic Notice Banner (Blue Notice Banner di Penpot) -->
+        <div class="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 text-blue-950">
+          <div class="w-8 h-8 rounded-xl bg-blue-600 text-white shrink-0 flex items-center justify-center shadow-xs">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="space-y-1 text-xs">
+            <h3 class="font-bold text-blue-900">Ketentuan Penyampaian Aspirasi</h3>
+            <p class="text-blue-800/90 leading-relaxed">
+              Aspirasi akan diverifikasi dalam 1x24 jam kerja. Pastikan data nomor tiket disimpan untuk pelacakan. Laporan yang diajukan bersifat objektif dan memuat rincian lokasi atau kendala yang jelas.
             </p>
           </div>
         </div>
-        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-          <!-- Tombol Uji TC-01 -->
-          <button id="btnUjiTC01" onclick="runTestTC01()"
-            class="flex-1 sm:flex-none text-xs bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 font-semibold px-3 py-2 rounded-lg transition shadow-2xs flex items-center justify-center gap-1.5">
-            <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            [Uji TC-01 (Submit Deskripsi Kosong)]
-          </button>
-          <!-- Tombol Uji TC-02 -->
-          <button id="btnUjiTC02" onclick="runTestTC02()"
-            class="flex-1 sm:flex-none text-xs bg-white hover:bg-blue-50 text-blue-700 border border-blue-300 font-semibold px-3 py-2 rounded-lg transition shadow-2xs flex items-center justify-center gap-1.5">
-            <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            [Uji TC-02 (Update Status Diproses)]
-          </button>
-          <!-- Tombol Uji SEC-01 -->
-          <button id="btnUjiSEC01" onclick="runTestSEC01()"
-            class="flex-1 sm:flex-none text-xs bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-300 font-semibold px-3 py-2 rounded-lg transition shadow-2xs flex items-center justify-center gap-1.5">
-            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            [Uji SEC-01 (Payload Anti-XSS)]
-          </button>
-        </div>
-      </div>
-    </section>
 
-    <!-- Main Split Layout (2 Kolom Responsif Sesuai DESIGN.md & Penpot) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-      <!-- ================= KOLOM KIRI: FORM INPUT PENGADUAN (5 Kolom) ================= -->
-      <div class="lg:col-span-5 bg-white rounded-xl border border-slate-200 shadow-xs p-6 sticky top-24">
-
-        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-          <div>
-            <h2 id="formTitle" class="text-base font-bold text-slate-900">Buat Pengaduan</h2>
-            <p id="formSubtitle" class="text-xs text-slate-500">Isi detail kendala atau aspirasi. Nomor tiket
-              diterbitkan otomatis.</p>
-          </div>
-          <span id="formModeBadge"
-            class="text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full">Mode
-            Input</span>
-        </div>
-
-        <!-- Dynamic Alert Error Box (TC-01 Validation Failure Target) -->
-        <div id="errorAlertBox"
-          class="hidden mt-4 p-3.5 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs flex items-start gap-2.5 transition-all">
-          <svg class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div class="flex-1">
-            <strong class="font-semibold block">Validasi Ditolak:</strong>
-            <span id="errorMessageText">Deskripsi wajib diisi</span>
-          </div>
-          <button onclick="hideErrorAlert()"
-            class="text-rose-500 hover:text-rose-800 text-sm leading-none">&times;</button>
-        </div>
-
-        <!-- Dynamic Success Alert Box -->
-        <div id="successAlertBox"
-          class="hidden mt-4 p-3.5 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 text-xs flex items-start gap-2.5 transition-all">
-          <svg class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          <div class="flex-1">
-            <strong class="font-semibold block">Berhasil!</strong>
-            <span id="successMessageText">Data tiket berhasil disimpan.</span>
-          </div>
-          <button onclick="hideSuccessAlert()"
-            class="text-emerald-500 hover:text-emerald-800 text-sm leading-none">&times;</button>
-        </div>
-
-        <!-- Form Tiket Pengaduan (Tanpa atribut required/min di HTML agar bisa dites Black Box) -->
-        <form id="ticketForm" onsubmit="handleFormSubmit(event)" class="mt-5 space-y-4" novalidate>
-          <input type="hidden" id="editRecordId" value="">
-
-          <!-- Field 1: Nomor Tiket (Read-only / Preview Auto-Generated) -->
-          <div>
-            <label for="nomor_tiket" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Nomor Tiket <span class="text-slate-400 font-normal lowercase">(otomatis)</span>
-            </label>
-            <div class="relative">
-              <input type="text" id="nomor_tiket" name="nomor_tiket" readonly
-                class="w-full bg-slate-100 border border-slate-200 text-slate-600 text-sm font-mono rounded-lg px-3.5 py-2.5 cursor-not-allowed select-all focus:outline-none"
-                placeholder="ADU-2026-0001">
-              <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-mono">AUTO</span>
-            </div>
-          </div>
-
-          <!-- Field 2: Nama Pelapor -->
-          <div>
-            <label for="nama_pelapor" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Nama Pelapor <span class="text-rose-500">*</span>
-            </label>
-            <input type="text" id="nama_pelapor" name="nama_pelapor"
-              class="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-lg px-3.5 py-2.5 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition focus:outline-none"
-              placeholder="Contoh: Rina Maharani">
-          </div>
-
-          <!-- Field 3: Kategori -->
-          <div>
-            <label for="kategori" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Kategori Pengaduan <span class="text-rose-500">*</span>
-            </label>
-            <select id="kategori" name="kategori"
-              class="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-lg px-3.5 py-2.5 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition focus:outline-none">
-              <option value="Kendala Teknis">Kendala Teknis</option>
-              <option value="Layanan Publik">Layanan Publik</option>
-              <option value="Sarana & Prasarana">Sarana &amp; Prasarana</option>
-              <option value="Aspirasi & Masukan">Aspirasi &amp; Masukan</option>
-            </select>
-          </div>
-
-          <!-- Field 4: Deskripsi (TARGET TC-01: Tidak memakai required/min di HTML) -->
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <label for="deskripsi" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                Deskripsi Laporan <span class="text-rose-500">*</span>
-              </label>
-              <span class="text-[11px] text-slate-400">Wajib diisi detail</span>
-            </div>
-            <!-- Catatan: Jangan tambahkan atribut required/min di tag textarea di bawah ini -->
-            <textarea id="deskripsi" name="deskripsi" rows="4"
-              class="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-lg p-3.5 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition focus:outline-none resize-y"
-              placeholder="Tuliskan kronologi, kendala, atau aspirasi Anda secara lengkap..."></textarea>
-          </div>
-
-          <!-- Field 5: Status Penanganan Tiket -->
-          <div>
-            <label for="status" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Status Penanganan
-            </label>
-            <select id="status" name="status"
-              class="w-full bg-white border border-slate-300 text-slate-900 text-sm rounded-lg px-3.5 py-2.5 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 transition focus:outline-none">
-              <option value="Pending">Pending (Menunggu Antrean)</option>
-              <option value="Diproses">Diproses (Sedang Dikerjakan)</option>
-              <option value="Selesai">Selesai (Penanganan Tuntas)</option>
-            </select>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="pt-2 flex flex-col sm:flex-row items-center gap-2.5">
-            <button type="submit" id="btnSubmit"
-              class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-2.5 px-4 rounded-lg shadow-sm shadow-indigo-200 transition flex items-center justify-center gap-2 cursor-pointer">
-              <svg id="submitSpinner" class="hidden w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                </path>
+        <!-- Form Card Container -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
+          
+          <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
-              <span id="btnSubmitText">Kirim Pengaduan</span>
-            </button>
-            <button type="button" id="btnCancelEdit" onclick="cancelEditMode()"
-              class="hidden w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm py-2.5 px-4 rounded-lg transition text-center cursor-pointer">
-              Batal
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- ================= KOLOM KANAN: TABEL DATA, PENCARIAN & FILTER (7 Kolom) ================= -->
-      <div class="lg:col-span-7 space-y-4">
-
-        <!-- Controls: Search Bar & Filters -->
-        <div
-          class="bg-white rounded-xl border border-slate-200 shadow-xs p-4 flex flex-col sm:flex-row items-center gap-3">
-          <!-- Search Box -->
-          <div class="relative flex-1 w-full">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <h3 class="text-sm font-bold text-slate-900">Data Pengajuan Aspirasi</h3>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+              FORMULIR TIKET RESMI
             </span>
-            <input type="text" id="searchInput" oninput="applyFilters()"
-              class="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-600 focus:outline-none transition"
-              placeholder="Cari nomor tiket, pelapor, atau deskripsi...">
           </div>
 
-          <!-- Status Filter Dropdown -->
-          <div class="w-full sm:w-44">
-            <select id="filterStatus" onchange="applyFilters()"
-              class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:bg-white focus:border-indigo-600 focus:outline-none transition">
-              <option value="ALL">Semua Status</option>
-              <option value="Pending">Pending</option>
-              <option value="Diproses">Diproses</option>
-              <option value="Selesai">Selesai</option>
-            </select>
-          </div>
-
-          <!-- Category Filter Dropdown -->
-          <div class="w-full sm:w-44">
-            <select id="filterKategori" onchange="applyFilters()"
-              class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 font-medium focus:bg-white focus:border-indigo-600 focus:outline-none transition">
-              <option value="ALL">Semua Kategori</option>
-              <option value="Kendala Teknis">Kendala Teknis</option>
-              <option value="Layanan Publik">Layanan Publik</option>
-              <option value="Sarana & Prasarana">Sarana &amp; Prasarana</option>
-              <option value="Aspirasi & Masukan">Aspirasi &amp; Masukan</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Table Container -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-          <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+          <form id="aspirationForm" class="space-y-5">
+            <!-- Field 1: Nomor Tiket Resmi -->
             <div>
-              <h3 class="text-sm font-bold text-slate-900">Riwayat Pengaduan &amp; Tiket</h3>
-              <p class="text-xs text-slate-500">Daftar laporan aduan yang tercatat pada sistem</p>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="nomor_tiket" class="text-xs font-bold text-slate-700">Nomor Tiket <span class="text-rose-500">*</span></label>
+                <button type="button" onclick="generateNewTicketId()" class="text-[11px] text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer">
+                  Perbarui ID
+                </button>
+              </div>
+              <input 
+                type="text" 
+                id="nomor_tiket" 
+                name="nomor_tiket" 
+                value="ASP-000123" 
+                readonly 
+                class="w-full px-3.5 py-2.5 text-sm font-mono font-bold rounded-xl border border-slate-200 bg-slate-50 text-indigo-950 cursor-not-allowed select-all"
+              />
+              <p class="text-[11px] text-slate-400 mt-1">Identitas nomor tiket resmi diterbitkan otomatis oleh sistem sebagai rujukan penanganan.</p>
             </div>
-            <span id="tableRecordCount"
-              class="text-xs font-semibold bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md">0 Laporan</span>
+
+            <!-- Field 2: Nama Pelapor -->
+            <div>
+              <label for="nama_pelapor" class="block text-xs font-bold text-slate-700 mb-1.5">Nama Pelapor <span class="text-rose-500">*</span></label>
+              <input 
+                type="text" 
+                id="nama_pelapor" 
+                name="nama_pelapor" 
+                value="" 
+                placeholder="Masukkan nama lengkap Anda..." 
+                class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-slate-400"
+              />
+              <p class="text-[11px] text-slate-400 mt-1">Gunakan nama yang sesuai dengan data mahasiswa atau kartu identitas.</p>
+            </div>
+
+            <!-- Field 3: Kategori Pengaduan -->
+            <div>
+              <label for="kategori" class="block text-xs font-bold text-slate-700 mb-1.5">Kategori <span class="text-rose-500">*</span></label>
+              <select id="kategori" name="kategori" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all bg-white font-medium">
+                <option value="Fasilitas Kampus">Fasilitas Kampus</option>
+                <option value="Sarana & Prasarana">Sarana & Prasarana</option>
+                <option value="Teknologi & Informasi">Teknologi & Informasi</option>
+                <option value="Layanan Administrasi">Layanan Administrasi</option>
+                <option value="Akademik">Akademik</option>
+                <option value="Finansial">Finansial</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+              <p class="text-[11px] text-slate-400 mt-1">Pilih rumpun aduan agar dialokasikan ke unit kerja teknis yang berwenang.</p>
+            </div>
+
+            <!-- Field 4: Rincian Aspirasi (Textarea dengan Error Box Sesuai Penpot) -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="deskripsi" class="text-xs font-bold text-slate-700">Rincian Aspirasi <span class="text-rose-500">*</span></label>
+                <span id="charCount" class="text-[11px] text-slate-400">0 karakter</span>
+              </div>
+              <textarea 
+                id="deskripsi" 
+                name="deskripsi" 
+                rows="4" 
+                placeholder="Tuliskan kendala secara rinci, lokasi kejadian, kronologi permasalahan, atau ide perbaikan..." 
+                class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-slate-400 leading-relaxed"
+              ></textarea>
+
+              <!-- KOTAK ALERT ERROR (TC-01 PERSIS SESUAI BOARD 1 PENPOT) -->
+              <div id="validationErrorBox" class="hidden mt-2 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 transition-all">
+                <svg class="w-4 h-4 shrink-0 text-rose-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="font-semibold" id="validationErrorMessage">
+                  Deskripsi wajib diisi - Berikan rincian laporan minimal keterangan singkat kendala.
+                </span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+              <button 
+                type="button" 
+                onclick="resetFormAspirasi()" 
+                class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                &larr; Batal
+              </button>
+
+              <button 
+                type="submit" 
+                id="btnSubmitAspirasi" 
+                class="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white text-xs font-semibold shadow-sm hover:shadow transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <span id="btnSubmitText">Kirim Aspirasi &rarr;</span>
+                <svg id="submitSpinner" class="hidden animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                </svg>
+              </button>
+            </div>
+          </form>
+
+        </div>
+
+        <!-- Disclaimer Footer -->
+        <p class="text-[11px] text-center text-slate-400 pb-8">
+          Sistem Informasi Pengaduan & Aspirasi Mahasiswa v2.1 • Data yang dikirimkan tunduk pada ketentuan kode etik kampus dan diawasi oleh tim penjaminan mutu.
+        </p>
+
+      </section>
+
+
+      <!-- =========================================================================
+           PAGE 2: NOMOR TIKET & STATUS (PERSIS DESAIN BOARD 2 PENPOT)
+           ========================================================================= -->
+      <section id="view-page2" class="page-view hidden p-6 sm:p-8 max-w-4xl mx-auto w-full space-y-6">
+
+        <!-- Top Header Success Indicator -->
+        <div class="text-center pt-2 pb-4 space-y-1.5">
+          <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center mb-3 shadow-xs">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Aspirasi Berhasil Dikirim</h2>
+          <p class="text-xs text-slate-500">Laporan Anda telah berhasil dicatat dalam antrean penanganan sistem.</p>
+        </div>
+
+        <!-- 2 Kolom Grid Kartu Tiket & Tahapan Status -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+
+          <!-- KARTU KIRI: NOMOR TIKET RESMI -->
+          <div class="md:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                <span class="text-xs font-semibold text-slate-500">Izin Pengaduan Resmi</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  TERDAFTAR
+                </span>
+              </div>
+              <p class="text-[11px] uppercase tracking-wider text-slate-400 font-bold">Nomor Tiket</p>
+              <div id="displayTicketNumber" class="text-3xl font-mono font-extrabold text-slate-900 tracking-tight my-2">
+                ASP-000123
+              </div>
+              <p class="text-xs text-slate-500 leading-relaxed">
+                Gunakan nomor tiket ini sebagai rujukan utama saat memeriksa status atau konfirmasi dengan petugas.
+              </p>
+            </div>
+
+            <!-- Tombol Salin Nomor Tiket -->
+            <div class="pt-6">
+              <button 
+                type="button" 
+                onclick="copyTicketNumber()" 
+                class="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                <span>Salin Nomor Tiket</span>
+              </button>
+            </div>
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr
-                  class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th class="px-4 py-3">No. Tiket</th>
-                  <th class="px-4 py-3">Pelapor</th>
-                  <th class="px-4 py-3">Kategori</th>
-                  <th class="px-4 py-3">Deskripsi Aduan</th>
-                  <th class="px-4 py-3">Status</th>
-                  <th class="px-4 py-3 text-right">Aksi</th>
-                </tr>
-              </thead>
-              <tbody id="ticketTableBody" class="divide-y divide-slate-100 text-xs">
-                <!-- Baris tabel dirender secara aman (Anti-XSS textContent) via createSafeTransactionRow -->
-              </tbody>
-            </table>
+          <!-- KARTU KANAN: TAHAPAN PENANGANAN & RINGKASAN ADUAN -->
+          <div class="md:col-span-7 space-y-4">
+            
+            <!-- Tahapan Penanganan (Status Stepper) -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-bold text-slate-800">Tahapan Penanganan</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-500">
+                  ESTIMASI 1-3 HARI KERJA
+                </span>
+              </div>
+
+              <!-- Stepper Timeline -->
+              <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                <!-- Step 1: Pending (Active) -->
+                <div class="flex flex-col items-center">
+                  <div id="step-pending-icon" class="w-9 h-9 rounded-full bg-slate-900 text-amber-400 flex items-center justify-center mb-1.5 shadow-xs">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs font-bold text-slate-900">Pending</span>
+                  <span id="step-pending-badge" class="text-[10px] font-semibold text-amber-600 mt-0.5">Tahap Aktif</span>
+                </div>
+
+                <!-- Step 2: Diproses -->
+                <div class="flex flex-col items-center opacity-40" id="step-diproses-box">
+                  <div id="step-diproses-icon" class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-1.5 border border-slate-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs font-bold text-slate-700">Diproses</span>
+                  <span class="text-[10px] text-slate-400 mt-0.5">Pemeriksaan</span>
+                </div>
+
+                <!-- Step 3: Selesai -->
+                <div class="flex flex-col items-center opacity-40" id="step-selesai-box">
+                  <div id="step-selesai-icon" class="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-1.5 border border-slate-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                  <span class="text-xs font-bold text-slate-700">Selesai</span>
+                  <span class="text-[10px] text-slate-400 mt-0.5">Tuntas</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ringkasan Aduan -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
+              <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <span class="text-xs font-bold text-slate-900">Ringkasan Laporan</span>
+                <span id="displayCreatedDate" class="text-[11px] text-slate-400 font-mono">15 Nov 2026, 19.45</span>
+              </div>
+
+              <div class="space-y-2 text-xs">
+                <div class="flex justify-between items-center py-1">
+                  <span class="text-slate-400 font-medium">Nama Pelapor:</span>
+                  <span id="displayNamaPelapor" class="font-bold text-slate-800">-</span>
+                </div>
+                <div class="flex justify-between items-center py-1">
+                  <span class="text-slate-400 font-medium">Kategori:</span>
+                  <span id="displayKategori" class="font-semibold px-2 py-0.5 rounded text-[11px] bg-slate-100 text-slate-700">
+                    Fasilitas Kampus
+                  </span>
+                </div>
+                <div class="py-1">
+                  <span class="text-slate-400 font-medium block mb-1">Deskripsi Aspirasi:</span>
+                  <p id="displayDeskripsi" class="text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100 leading-relaxed break-words font-normal">
+                    Pendingin ruangan (AC) di ruang kelas F2.01 tidak berfungsi dengan baik sejak hari Senin, mohon perbaikan segera agar perkuliahan kembali nyaman.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Quick Next Action Links -->
+              <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold">
+                <button type="button" onclick="switchPage('page1')" class="text-slate-600 hover:text-slate-900 cursor-pointer">
+                  + Buat Aspirasi Baru
+                </button>
+                <button type="button" id="btnPage2ToPage3" onclick="handlePage2NextClick()" class="text-indigo-600 hover:text-indigo-800 cursor-pointer flex items-center gap-1">
+                  <span id="btnPage2ToPage3Text">Lihat di Antrean Aspirasi</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </button>
+              </div>
+
+            </div>
+
           </div>
 
-          <!-- Empty State (Jika tidak ada data) -->
-          <div id="emptyState" class="hidden p-10 text-center">
-            <div
-              class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-3">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-              </svg>
+        </div>
+
+      </section>
+
+
+      <!-- =========================================================================
+           PAGE 3: ANTREAN ASPIRASI (PERSIS DESAIN BOARD 3 PENPOT)
+           ========================================================================= -->
+      <section id="view-page3" class="page-view hidden p-6 sm:p-8 max-w-6xl mx-auto w-full space-y-6">
+
+        <!-- Header Page 3 -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p class="text-[11px] uppercase tracking-wider font-semibold text-slate-400">
+              PORTAL LAYANAN MAHASISWA &nbsp;/&nbsp; <span class="text-indigo-600 font-bold">PORTAL PETUGAS</span>
+            </p>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">Antrean Aspirasi</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Daftar aspirasi aktif dan riwayat tiket yang terdaftar di database sistem.</p>
+          </div>
+          <button 
+            type="button" 
+            onclick="switchPage('page1')" 
+            class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+          >
+            <span>+ Buat Tiket</span>
+          </button>
+        </div>
+
+        <!-- Green Banner Sesuai Penpot Board 3 -->
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-800 flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <span class="font-medium">Semua antrean diverifikasi secara terbuka dan transparan sesuai urutan kedatangan.</span>
+        </div>
+
+        <!-- 2 Kolom: Tabel Antrean & Panel Detail/Update Tiket -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+          <!-- TABEL ANTREAN (KIRI) -->
+          <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Daftar Tiket Antrean</h3>
+                <span id="p3RecordBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">3 Tiket</span>
+              </div>
+              <div class="flex items-center gap-2 w-full sm:w-auto">
+                <select id="p3FilterStatus" onchange="renderPage3Table()" class="px-2.5 py-1 text-xs rounded-lg border border-slate-200 bg-white">
+                  <option value="Semua">Semua Status</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Diproses">Diproses</option>
+                  <option value="Selesai">Selesai</option>
+                </select>
+              </div>
             </div>
-            <h4 class="text-sm font-semibold text-slate-700">Belum ada tiket pengaduan</h4>
-            <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Silakan buat pengaduan baru melalui formulir di
-              samping kiri atau sesuaikan filter pencarian.</p>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-100 text-[11px] font-bold uppercase text-slate-500">
+                    <th class="px-4 py-3">Nomor Tiket</th>
+                    <th class="px-4 py-3">Waktu Laporan</th>
+                    <th class="px-4 py-3">Kategori</th>
+                    <th class="px-4 py-3">Rincian Aduan</th>
+                    <th class="px-4 py-3 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="p3TableBody" class="divide-y divide-slate-100 text-xs">
+                  <!-- Baris tiket diisi secara aman dengan createSafeRow -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PANEL RINCIAN & UPDATE STATUS (KANAN) -->
+          <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 class="text-xs font-bold text-slate-900 uppercase">Rincian Data Tiket</h3>
+              <span id="p3DetailStatusBadge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                Pending
+              </span>
+            </div>
+
+            <div>
+              <span class="text-[10px] uppercase font-bold text-slate-400">Kode Tiket Terpilih</span>
+              <p id="p3DetailNomor" class="text-lg font-mono font-extrabold text-indigo-700">ASP-000123</p>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div>
+                <span class="text-slate-400 font-medium">Pelapor:</span>
+                <p id="p3DetailPelapor" class="font-bold text-slate-800">Ahmad Fauzi</p>
+              </div>
+              <div>
+                <span class="text-slate-400 font-medium">Kategori:</span>
+                <p id="p3DetailKategori" class="text-slate-700">Sarana & Prasarana</p>
+              </div>
+              <div>
+                <span class="text-slate-400 font-medium">Rincian:</span>
+                <p id="p3DetailDeskripsi" class="text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100 leading-relaxed">
+                  Proyektor di ruang Lab Komputer 3 tidak memancarkan layar...
+                </p>
+              </div>
+            </div>
+
+            <!-- Form Update Status Tiket (TC-02) -->
+            <div class="pt-3 border-t border-slate-100 space-y-3">
+              <label for="p3SelectStatus" class="block text-xs font-bold text-slate-700">Ubah Status Penanganan Tiket:</label>
+              <select id="p3SelectStatus" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-white font-medium">
+                <option value="Pending">Pending (Menunggu Antrean)</option>
+                <option value="Diproses">Diproses (Sedang Dikerjakan)</option>
+                <option value="Selesai">Selesai (Penanganan Tuntas)</option>
+              </select>
+
+              <button 
+                type="button" 
+                onclick="handleUpdateStatusPage3()" 
+                class="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+              >
+                Perbarui Status Tiket
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================================================================
+           PAGE 4: PANDUAN & STANDAR OPERASIONAL PROSEDUR (SOP)
+           ========================================================================= -->
+      <section id="view-panduan" class="page-view hidden p-6 sm:p-8 max-w-5xl mx-auto w-full space-y-8">
+
+        <!-- Breadcrumbs & Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <p class="text-[11px] uppercase tracking-wider font-semibold text-slate-400">
+              PORTAL LAYANAN MAHASISWA &nbsp;/&nbsp; DOKUMEN RESMI &nbsp;/&nbsp; <span class="text-indigo-600 font-bold">PANDUAN & SOP</span>
+            </p>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">Panduan & Standar Operasional Prosedur (SOP)</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Pedoman alur tata kelola, hak pelapor, serta standar waktu pelayanan pengaduan mahasiswa.</p>
+          </div>
+          <div class="flex items-center gap-2 self-start sm:self-auto">
+            <button 
+              type="button" 
+              onclick="switchPage('page1')" 
+              class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>+ Buat Aspirasi</span>
+            </button>
+            <button 
+              type="button" 
+              onclick="switchPage('page3')" 
+              class="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <span>Lihat Antrean</span>
+            </button>
           </div>
         </div>
 
+        <!-- Banner Komitmen Pelayanan -->
+        <div class="bg-[#eff6ff] border border-[#bfdbfe] rounded-2xl p-5 flex items-start gap-4 text-blue-950">
+          <div class="w-10 h-10 rounded-xl bg-blue-600 text-white shrink-0 flex items-center justify-center shadow-xs">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <div class="space-y-1 text-xs">
+            <h3 class="font-bold text-sm text-blue-900">Komitmen Layanan & Perlindungan Pelapor</h3>
+            <p class="text-blue-800/90 leading-relaxed">
+              Setiap pengaduan yang diajukan oleh mahasiswa berstatus resmi dan dilindungi kerahasiaan identitasnya. Seluruh aspirasi wajib diverifikasi dalam batas waktu <strong>1x24 jam kerja</strong> dan ditindaklanjuti secara akuntabel demi kenyamanan sivitas akademika kampus.
+            </p>
+          </div>
+        </div>
+
+        <!-- BAGIAN 1: ALUR SIKLUS HIDUP PENANGANAN TIKET (4 TAHAP) -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">1. Alur 4 Tahap Penanganan Aspirasi</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Tahap 1 -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs relative">
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600 mb-2 inline-block">TAHAP 01</span>
+              <h4 class="text-xs font-bold text-slate-900 mb-1">Pengajuan Laporan</h4>
+              <p class="text-[11px] text-slate-500 leading-relaxed">
+                Mahasiswa mengisi formulir aspirasi. Sistem menerbitkan nomor tiket resmi berformat <span class="font-mono font-semibold text-indigo-600">ASP-XXXXXX</span>.
+              </p>
+              <div class="mt-3 pt-3 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between">
+                <span>Waktu Proses:</span>
+                <span class="font-bold text-slate-700">Real-time</span>
+              </div>
+            </div>
+
+            <!-- Tahap 2 -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs relative">
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 mb-2 inline-block">TAHAP 02</span>
+              <h4 class="text-xs font-bold text-slate-900 mb-1">Verifikasi Help Desk</h4>
+              <p class="text-[11px] text-slate-500 leading-relaxed">
+                Petugas menelaah validitas kendala dan mengalokasikan laporan ke unit teknis terkait. Status berubah menjadi <span class="font-semibold text-amber-600">Pending</span> &rarr; <span class="font-semibold text-sky-600">Diproses</span>.
+              </p>
+              <div class="mt-3 pt-3 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between">
+                <span>SLA Verifikasi:</span>
+                <span class="font-bold text-slate-700">&le; 24 Jam Kerja</span>
+              </div>
+            </div>
+
+            <!-- Tahap 3 -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs relative">
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 mb-2 inline-block">TAHAP 03</span>
+              <h4 class="text-xs font-bold text-slate-900 mb-1">Tindak Lanjut Lapangan</h4>
+              <p class="text-[11px] text-slate-500 leading-relaxed">
+                Unit teknis (Sarana/TI/Akademik) melakukan perbaikan fisik fasilitas, pengecekan konfigurasi server, atau koordinasi administratif.
+              </p>
+              <div class="mt-3 pt-3 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between">
+                <span>SLA Penanganan:</span>
+                <span class="font-bold text-slate-700">1 - 3 Hari Kerja</span>
+              </div>
+            </div>
+
+            <!-- Tahap 4 -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs relative">
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 mb-2 inline-block">TAHAP 04</span>
+              <h4 class="text-xs font-bold text-slate-900 mb-1">Penyelesaian Tiket</h4>
+              <p class="text-[11px] text-slate-500 leading-relaxed">
+                Petugas mencatat solusi kendala dan menandai status menjadi <span class="font-semibold text-emerald-600">Selesai</span>. Mahasiswa dapat melihat rekap solusi di portal.
+              </p>
+              <div class="mt-3 pt-3 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between">
+                <span>Status Akhir:</span>
+                <span class="font-bold text-emerald-600">Tuntas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAGIAN 2: DO'S & DON'TS PENGAJUAN ASPIRASI -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">2. Ketentuan Laporan (Do's & Don'ts)</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- Kolom Kiri: DO'S -->
+            <div class="bg-white rounded-2xl border border-emerald-200 p-5 shadow-xs space-y-3">
+              <div class="flex items-center gap-2 text-emerald-700 font-bold text-xs pb-2 border-b border-emerald-100">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <span>Hal yang Dianjurkan (Diterima)</span>
+              </div>
+              <ul class="space-y-2 text-xs text-slate-600 leading-relaxed">
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-500 font-bold mt-0.5">&check;</span>
+                  <span><strong>Spesifik pada lokasi:</strong> Cantumkan nama gedung, lantai, dan nomor ruangan (misal: <em>Ruang Lab Komputer 3</em>).</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-500 font-bold mt-0.5">&check;</span>
+                  <span><strong>Bahasa santun & objektif:</strong> Uraikan kronologi atau indikator kendala tanpa menyertakan asumsi pribadi yang merugikan.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-500 font-bold mt-0.5">&check;</span>
+                  <span><strong>Kategori sesuai:</strong> Pilih rumpun aduan yang selaras agar langsung masuk ke bagian teknis yang tepat.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-emerald-500 font-bold mt-0.5">&check;</span>
+                  <span><strong>Simpan nomor tiket:</strong> Salin kode <em>ASP-XXXXXX</em> untuk pelacakan berkala tanpa perlu menanyakan ke petugas.</span>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Kolom Kanan: DON'TS -->
+            <div class="bg-white rounded-2xl border border-rose-200 p-5 shadow-xs space-y-3">
+              <div class="flex items-center gap-2 text-rose-700 font-bold text-xs pb-2 border-b border-rose-100">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                </svg>
+                <span>Hal yang Dilarang (Ditolak)</span>
+              </div>
+              <ul class="space-y-2 text-xs text-slate-600 leading-relaxed">
+                <li class="flex items-start gap-2">
+                  <span class="text-rose-500 font-bold mt-0.5">&times;</span>
+                  <span><strong>Ujaran kebencian & SARA:</strong> Pengaduan yang mengandung kata-kata kasar, pelecehan, atau provokasi akan diblokir permanen.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-rose-500 font-bold mt-0.5">&times;</span>
+                  <span><strong>Tuduhan tanpa bukti / Fitnah:</strong> Laporan yang menyudutkan individu tanpa dasar fakta tidak akan diproses.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-rose-500 font-bold mt-0.5">&times;</span>
+                  <span><strong>Spam laporan ganda:</strong> Dilarang mengirimkan aduan yang sama berulang kali dalam kurun waktu kurang dari 24 jam.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-rose-500 font-bold mt-0.5">&times;</span>
+                  <span><strong>Deskripsi kosong:</strong> Form wajib memuat uraian deskripsi kendala (mengacu pada kepatuhan uji <em>TC-01</em>).</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAGIAN 3: KLASIFIKASI KATEGORI & UNIT KERJA TERKAIT -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">3. Pemetaan Kategori & Unit Pelaksana</h3>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+              <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs mb-2">
+                FS
+              </div>
+              <h4 class="text-xs font-bold text-slate-900">Fasilitas Kampus</h4>
+              <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                Pendingin ruangan (AC), proyektor, kursi kuliah, penerangan kelas, kelistrikan, dan fasilitas umum gedung.
+              </p>
+              <span class="inline-block mt-2 text-[10px] font-semibold text-slate-400">Unit: Sarana & Prasarana</span>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+              <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-xs mb-2">
+                TI
+              </div>
+              <h4 class="text-xs font-bold text-slate-900">Teknologi & Informasi</h4>
+              <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                Jaringan Wi-Fi kampus, autentikasi SSO, portal SIAKAD, email resmi mahasiswa, dan komputer laboratorium.
+              </p>
+              <span class="inline-block mt-2 text-[10px] font-semibold text-slate-400">Unit: Pusat Komputer (Puskom)</span>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+              <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs mb-2">
+                AD
+              </div>
+              <h4 class="text-xs font-bold text-slate-900">Layanan Administrasi</h4>
+              <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                Pengurusan surat keterangan aktif kuliah, legalisir ijazah/transkrip online, dan perpustakaan kampus.
+              </p>
+              <span class="inline-block mt-2 text-[10px] font-semibold text-slate-400">Unit: Biro Administrasi Akademik</span>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs">
+              <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs mb-2">
+                AK
+              </div>
+              <h4 class="text-xs font-bold text-slate-900">Akademik & Finansial</h4>
+              <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                Jadwal perkuliahan, kendala KRS, beasiswa, konsultasi pembayaran UKT, serta dana kegiatan kemahasiswaan.
+              </p>
+              <span class="inline-block mt-2 text-[10px] font-semibold text-slate-400">Unit: BAAK & Keuangan</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- BAGIAN 4: FAQ / TANYA JAWAB INTERAKTIF (ACCORDION) -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">4. Tanya Jawab Umum (FAQ)</h3>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100 shadow-xs overflow-hidden">
+            <!-- FAQ 1 -->
+            <div class="p-4 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleFaq('faq1')">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-800">Berapa lama estimasi penanganan tiket aspirasi saya?</span>
+                <span id="faq1-icon" class="text-slate-400 text-sm font-bold transition-transform">&plus;</span>
+              </div>
+              <p id="faq1-content" class="hidden mt-2 text-xs text-slate-500 leading-relaxed border-t border-slate-50 pt-2">
+                Verifikasi awal berkas laporan dilakukan maksimal <strong>1x24 jam kerja</strong>. Tindak lanjut perbaikan fasilitas fisik atau konfigurasi sistem membutuhkan rata-rata <strong>1 hingga 3 hari kerja</strong> tergantung tingkat kendala lapangan.
+              </p>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="p-4 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleFaq('faq2')">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-800">Apakah nomor tiket ASP-XXXXXX dapat diakses oleh mahasiswa lain?</span>
+                <span id="faq2-icon" class="text-slate-400 text-sm font-bold transition-transform">&plus;</span>
+              </div>
+              <p id="faq2-content" class="hidden mt-2 text-xs text-slate-500 leading-relaxed border-t border-slate-50 pt-2">
+                Nomor tiket dan ringkasan kendala tampil di antrean publik untuk mendukung transparansi layanan. Namun demikian, data pribadi mendalam tetap terlindungi oleh sistem keamanan.
+              </p>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="p-4 cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleFaq('faq3')">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-800">Bagaimana jika kendala belum selesai padahal status sudah 'Selesai'?</span>
+                <span id="faq3-icon" class="text-slate-400 text-sm font-bold transition-transform">&plus;</span>
+              </div>
+              <p id="faq3-content" class="hidden mt-2 text-xs text-slate-500 leading-relaxed border-t border-slate-50 pt-2">
+                Anda dapat mengajukan tiket pengaduan baru dengan mencantumkan nomor tiket rujukan sebelumnya pada kolom rincian aspirasi, atau menghubungi layanan bantuan help desk.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Callout -->
+        <div class="p-6 rounded-2xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm mb-6">
+          <div>
+            <h4 class="text-sm font-bold text-white">Ada kendala fasilitas atau layanan kampus hari ini?</h4>
+            <p class="text-xs text-slate-300 mt-0.5">Sampaikan laporan Anda sekarang dan pantau proses penanganannya secara langsung.</p>
+          </div>
+          <button 
+            type="button" 
+            onclick="switchPage('page1')" 
+            class="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-900 text-xs font-bold shrink-0 shadow-sm transition-all cursor-pointer"
+          >
+            Kirim Aspirasi Sekarang &rarr;
+          </button>
+        </div>
+
+      </section>
+
+    </div>
+
+  </div>
+
+  <!-- ================= MODAL BANTUAN & KONTAK RESMI ================= -->
+  <div id="contactModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-sm font-bold text-slate-900">Bantuan & Kontak Help Desk</h3>
+        </div>
+        <button type="button" onclick="closeContactModal()" class="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-500 leading-relaxed">
+        Jika membutuhkan eskalasi cepat, konsultasi kendala darurat, atau kendala verifikasi sistem, hubungi kanal resmi help desk berikut:
+      </p>
+
+      <div class="space-y-2.5 text-xs">
+        <a href="https://wa.me/628888996653" target="_blank" rel="noopener noreferrer" class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-between transition-colors group cursor-pointer">
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[11px]">WA</span>
+            <div>
+              <p class="font-bold text-slate-800 group-hover:text-emerald-700 transition-colors">WhatsApp Help Desk</p>
+              <p class="text-[11px] text-slate-500 font-mono">08888996653</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Online</span>
+        </a>
+
+        <a href="mailto:aspirasimahasiswa@gmail.com" class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 flex items-center justify-between transition-colors group cursor-pointer">
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-[11px]">EM</span>
+            <div>
+              <p class="font-bold text-slate-800 group-hover:text-sky-700 transition-colors">Email Resmi Layanan</p>
+              <p class="text-[11px] text-slate-500 font-mono">aspirasimahasiswa@gmail.com</p>
+            </div>
+          </div>
+          <span class="text-[10px] font-semibold text-slate-500">24 Jam</span>
+        </a>
+
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2.5">
+          <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-[11px]">GD</span>
+          <div>
+            <p class="font-bold text-slate-800">Sekretariat Layanan Terpadu</p>
+            <p class="text-[11px] text-slate-500">Gedung Kuliah Bersama (Senin-Jumat, 08.00-16.00 WIB)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <button 
+          type="button" 
+          onclick="closeContactModal()" 
+          class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold cursor-pointer"
+        >
+          Tutup
+        </button>
       </div>
     </div>
-  </main>
+  </div>
 
-  <!-- Modal Bantuan Konfigurasi Supabase -->
-  <div id="configModal"
-    class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-        <h3 class="text-sm font-bold text-slate-900">Panduan Menghubungkan Supabase Cloud</h3>
-        <button onclick="toggleConfigModal()"
-          class="text-slate-400 hover:text-slate-600 text-xl font-bold leading-none">&times;</button>
-      </div>
-      <div class="mt-4 space-y-3 text-xs text-slate-600 leading-relaxed">
-        <p>1. Buka <strong>Supabase Dashboard</strong> Anda di <a href="https://supabase.com/dashboard" target="_blank"
-            class="text-indigo-600 underline">supabase.com</a>.</p>
-        <p>2. Jalankan seluruh perintah SQL di berkas <code>supabase_schema.sql</code> melalui menu <strong>SQL
-            Editor</strong> Supabase.</p>
-        <p>3. Salin <strong>Project URL</strong> dan <strong>Anon Public Key</strong> dari menu <em>Project Settings
-            &gt; API</em>.</p>
-        <p>4. Buka berkas <code>index.html</code> ini, lalu ganti nilai variabel pada baris script:</p>
-        <div class="bg-slate-900 text-emerald-400 p-3 rounded-lg font-mono text-[11px] overflow-x-auto">
-          const SUPABASE_URL = 'https://hbekdutsineitvrghcui.supabase.co';<br>
-          const SUPABASE_ANON_KEY = 'sb_publishable_npHOglpUjq9kS9--oy6Teg_Iqbb9-bn';
+  <!-- ================= MODAL AKSES DITOLAK (RBAC 403 FORBIDDEN) ================= -->
+  <div id="accessDeniedModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl border border-rose-200 shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+      <div class="flex items-center justify-between pb-3 border-b border-rose-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center font-bold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Akses Ditolak (HTTP 403)</h3>
+            <p class="text-[10px] text-rose-600 font-semibold uppercase tracking-wider">Role-Based Access Control</p>
+          </div>
         </div>
-        <p class="text-slate-500 italic">*Jangan pernah memasukkan <code>service_role</code> secret key di kode frontend
-          browser.</p>
+        <button type="button" onclick="closeAccessDeniedModal()" class="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center cursor-pointer">
+          ✕
+        </button>
       </div>
-      <div class="mt-5 text-right">
-        <button onclick="toggleConfigModal()"
-          class="bg-indigo-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
+
+      <div class="space-y-2 text-xs text-slate-600 leading-relaxed">
+        <p>
+          Peran Anda saat ini adalah <strong class="text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">Mahasiswa (Pelapor)</strong>.
+        </p>
+        <p>
+          Berdasarkan kebijakan sistem RBAC, halaman <strong id="deniedFeatureName" class="text-slate-900 font-bold">Antrean Aspirasi</strong> dan pembaruan status hanya dapat diakses oleh <strong class="text-slate-900">Administrator / Petugas Help Desk</strong>.
+        </p>
+        <p class="text-[11px] text-slate-400 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+          Mahasiswa hanya memiliki hak akses untuk <strong>Kirim Aspirasi</strong>, melihat <strong>Nomor Tiket & Status</strong> miliknya, serta membaca <strong>Panduan & SOP</strong>.
+        </p>
+      </div>
+
+      <div class="pt-2 flex items-center gap-2">
+        <button 
+          type="button" 
+          onclick="elevateToAdminAndOpen()" 
+          class="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+        >
+          <span>🛡️ Beralih ke Role Admin</span>
+        </button>
+        <button 
+          type="button" 
+          onclick="closeAccessDeniedModal()" 
+          class="py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer"
+        >
           Mengerti
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400">
-      Workshop JKB X PERMIKOMNAS &bull; Sistem Pengaduan dan Aspirasi (Help Desk Ticket) &bull; SKPL Implementation
-    </div>
-  </footer>
+  <!-- ================= MODAL VERIFIKASI KATA SANDI ADMIN ================= -->
+  <div id="adminPasswordModal" class="fixed inset-0 z-50 hidden bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-sm w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold shadow-xs">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Autentikasi Administrator</h3>
+            <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Verifikasi Hak Akses RBAC</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdminPasswordModal()" class="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center cursor-pointer">
+          ✕
+        </button>
+      </div>
 
-  <!-- =================================================================== -->
-  <!-- JAVASCRIPT LOGIC & SUPABASE CLIENT INTEGRATION                       -->
-  <!-- =================================================================== -->
+      <div class="space-y-3 text-xs">
+        <p class="text-slate-600 leading-relaxed">
+          Untuk beralih ke peran <strong class="text-slate-900 font-bold">Administrator Help Desk</strong>, silakan masukkan kata sandi resmi:
+        </p>
+
+        <!-- Form Password Input with Eye Toggle -->
+        <div class="space-y-1.5">
+          <label for="adminPasswordInput" class="block text-[11px] font-bold text-slate-700">Kata Sandi Admin</label>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="adminPasswordInput" 
+              placeholder="Masukkan kata sandi..." 
+              onkeydown="if(event.key === 'Enter') submitAdminPassword()"
+              class="w-full pl-3 pr-10 py-2.5 text-xs rounded-xl border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-slate-400"
+            />
+            <button 
+              type="button" 
+              id="adminPasswordEyeBtn"
+              onclick="toggleShowAdminPassword()" 
+              class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+              title="Lihat / Sembunyikan sandi"
+            >
+              <span id="adminPasswordEyeIcon">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+          <div class="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+            <span>Petunjuk: Kata sandi wajib diisi</span>
+            <span class="text-indigo-600 hover:underline cursor-pointer font-medium" onclick="document.getElementById('adminPasswordInput').value='Fira Cantik'">Isi cepat</span>
+          </div>
+        </div>
+
+        <!-- Box Error Alert jika password salah -->
+        <div id="adminPasswordError" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2">
+          <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span id="adminPasswordErrorText" class="text-[11px] font-semibold">Kata sandi salah! Akses Administrator ditolak.</span>
+        </div>
+      </div>
+
+      <div class="pt-2 flex items-center gap-2">
+        <button 
+          type="button" 
+          onclick="closeAdminPasswordModal()" 
+          class="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold cursor-pointer"
+        >
+          Batal
+        </button>
+        <button 
+          type="button" 
+          onclick="submitAdminPassword()" 
+          class="flex-1 py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+        >
+          <span>Verifikasi & Masuk</span>
+          <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FLOATING TOAST NOTIFICATION (PERSIS DI BAWAH BOARD 2 PENPOT) ================= -->
+  <div id="penpotToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden transition-all duration-300">
+    <div class="bg-slate-900/95 text-white px-5 py-2.5 rounded-full shadow-lg text-xs font-medium flex items-center gap-2 border border-slate-800 backdrop-blur-xs">
+      <svg class="w-4 h-4 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+      </svg>
+      <span id="toastMessage">Nomor tiket berhasil disalin ke clipboard!</span>
+    </div>
+  </div>
+
+  <!-- ================= PANEL UJI CEPAT SKPL-06 (QA & SECURITY HELPER BAR) ================= -->
+  <div class="fixed bottom-4 right-4 z-40">
+    <div class="bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-xl p-3 max-w-xs space-y-2 text-xs">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1.5 font-bold text-slate-800">
+          <span class="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
+          <span>Panel Uji Cepat SKPL-06</span>
+        </div>
+        <button onclick="this.parentElement.parentElement.classList.toggle('hidden')" class="text-slate-400 hover:text-slate-600 cursor-pointer">✕</button>
+      </div>
+      <div class="grid grid-cols-1 gap-1.5 pt-1">
+        <button type="button" onclick="testTC01()" class="w-full text-left px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold border border-rose-200 transition-colors cursor-pointer">
+          [Uji TC-01: Deskripsi Kosong]
+        </button>
+        <button type="button" onclick="testTC02()" class="w-full text-left px-2.5 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 font-semibold border border-sky-200 transition-colors cursor-pointer">
+          [Uji TC-02: Status ke 'Diproses']
+        </button>
+        <button type="button" onclick="testSEC01()" class="w-full text-left px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold border border-amber-200 transition-colors cursor-pointer">
+          [Uji SEC-01: Payload XSS]
+        </button>
+        <button type="button" onclick="toggleRoleQA()" class="w-full text-left px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold border border-indigo-200 transition-colors cursor-pointer flex items-center justify-between">
+          <span>[Uji RBAC: Ganti Role]</span>
+          <span id="qaRolePill" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-200 text-indigo-800">Mahasiswa</span>
+        </button>
+        <button type="button" onclick="resetDataSimulasi()" class="w-full text-left px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold border border-slate-300 transition-colors cursor-pointer flex items-center justify-between" title="Bersihkan tiket uji coba dan kembalikan ke data awal">
+          <span>[🔄 Reset Data Simulasi]</span>
+          <span class="text-[9px] font-mono text-slate-500">Bersihkan</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC & SUPABASE INTEGRATION ================= -->
   <script>
-    // -------------------------------------------------------------------
-    // 1. KONFIGURASI KONEKSI SUPABASE & DETEKSI MODE FALLBACK CERDAS
-    // -------------------------------------------------------------------
+    /* =========================================================================
+       1. KONFIGURASI SUPABASE & LOCALSTORAGE FALLBACK
+       ========================================================================= */
     const SUPABASE_URL = 'https://hbekdutsineitvrghcui.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_npHOglpUjq9kS9--oy6Teg_Iqbb9-bn';
 
-    // Cek apakah URL Supabase valid (bukan placeholder template)
-    const isCloudSupabase = SUPABASE_URL &&
-      SUPABASE_URL.startsWith('https://') &&
-      SUPABASE_URL.includes('.supabase.co') &&
-      !SUPABASE_URL.includes('GANTI_DENGAN');
+    const isCloudSupabaseConfigured = () => {
+      return (
+        typeof SUPABASE_URL === 'string' &&
+        SUPABASE_URL.startsWith('https://') &&
+        SUPABASE_URL.includes('.supabase.co') &&
+        SUPABASE_ANON_KEY !== 'GANTI_DENGAN_SUPABASE_ANON_KEY_ANDA' &&
+        SUPABASE_ANON_KEY.length > 20
+      );
+    };
 
     let supabaseClient = null;
-    if (isCloudSupabase && window.supabase) {
-      try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      } catch (err) {
-        console.error('Gagal menginisialisasi Supabase Client:', err);
-      }
-    }
+    let isCloudMode = false;
+    const LOCAL_STORAGE_KEY = 'ASPIRASI_PENPOT_TICKETS_V2';
+    let ticketsState = [];
+    let currentSelectedTicket = null;
 
-    // Inisialisasi Data Demo Awal (Sesuai Penpot & supabase_schema.sql)
-    const SEED_DATA = [
+    const initialTicketsData = [
       {
         id: 1,
-        nomor_tiket: 'ADU-2026-0001',
+        nomor_tiket: 'ASP-000123',
         nama_pelapor: 'Ahmad Fauzi',
-        kategori: 'Kendala Teknis',
-        deskripsi: 'Tidak dapat mengakses portal sistem informasi akademik saat mengunggah berkas registrasi.',
+        kategori: 'Sarana & Prasarana',
+        deskripsi: 'Proyektor di ruang Lab Komputer 3 tidak memancarkan layar dan kabel HDMI longgar sehingga kegiatan perkuliahan terganggu.',
         status: 'Pending',
-        created_at: new Date(Date.now() - 3600000 * 3).toISOString()
+        created_at: new Date(Date.now() - 3600000 * 5).toISOString()
       },
       {
         id: 2,
-        nomor_tiket: 'ADU-2026-0002',
-        nama_pelapor: 'Siti Nurhaliza',
-        kategori: 'Sarana & Prasarana',
-        deskripsi: 'Koneksi Wi-Fi di lantai 3 Gedung Workshop sering putus-putus dan butuh reset access point.',
+        nomor_tiket: 'ASP-000122',
+        nama_pelapor: 'Siti Rahmawati',
+        kategori: 'Layanan Akademik',
+        deskripsi: 'Pengajuan revisi KRS semester ganjil belum diverifikasi oleh dosen wali sejak 3 hari yang lalu.',
         status: 'Diproses',
-        created_at: new Date(Date.now() - 86400000 * 1).toISOString()
+        created_at: new Date(Date.now() - 3600000 * 24).toISOString()
       },
       {
         id: 3,
-        nomor_tiket: 'ADU-2026-0003',
-        nama_pelapor: 'Budi Hartono',
-        kategori: 'Layanan Publik',
-        deskripsi: 'Permohonan legalisir dokumen sertifikat pelatihan telah diverifikasi dan siap diambil di loket.',
+        nomor_tiket: 'ASP-000121',
+        nama_pelapor: 'Dimas Aditya',
+        kategori: 'Fasilitas Umum & Sanitasi',
+        deskripsi: 'AC di Gedung C lantai 2 bocor dan mengeluarkan tetesan air ke lantai koridor membahayakan pejalan kaki.',
         status: 'Selesai',
-        created_at: new Date(Date.now() - 86400000 * 2).toISOString()
+        created_at: new Date(Date.now() - 3600000 * 48).toISOString()
       }
     ];
 
-    // State Aplikasi
-    let allTickets = [];
-    let isEditing = false;
-
-    // -------------------------------------------------------------------
-    // 2. FUNGSI PERSISTENSI DATA (SUPABASE vs LOCAL STORAGE FALLBACK)
-    // -------------------------------------------------------------------
-    function getLocalData() {
-      const stored = localStorage.getItem('tickets_data');
-      if (!stored) {
-        localStorage.setItem('tickets_data', JSON.stringify(SEED_DATA));
-        return [...SEED_DATA];
+    function generateNewTicketId() {
+      const randomNum = Math.floor(100000 + Math.random() * 900000);
+      const newId = `ASP-${randomNum}`;
+      const input = document.getElementById('nomor_tiket');
+      if (input) {
+        input.value = newId;
       }
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        return [...SEED_DATA];
-      }
+      return newId;
     }
 
-    function saveLocalData(data) {
-      localStorage.setItem('tickets_data', JSON.stringify(data));
-    }
+    /* =========================================================================
+       2. MANAJEMEN ROLE-BASED ACCESS CONTROL (RBAC) & OTORISASI KATA SANDI
+       Aturan:
+       - Mahasiswa: Hanya boleh buka Kirim Aspirasi (Page 1), Nomor Tiket & Status (Page 2), dan Panduan SOP (Page 4).
+       - Admin: Memiliki akses penuh ke seluruh halaman termasuk Antrean Aspirasi (Page 3) & ubah status tiket.
+       - Ganti role ke Admin WAJIB memasukkan kata sandi: "Fira Cantik".
+       - Ganti role ke Mahasiswa TIDAK PERLU kata sandi.
+       ========================================================================= */
+    const ADMIN_PASSWORD = 'Fira Cantik';
+    let currentRole = localStorage.getItem('APP_USER_ROLE') || 'mahasiswa';
 
-    // Mengambil data tiket (Read / SELECT)
-    async function fetchTickets() {
-      setSubmitLoading(true);
-      try {
-        if (supabaseClient) {
-          const { data, error } = await supabaseClient
-            .from('tickets')
-            .select('*')
-            .order('id', { ascending: false });
-
-          if (error) throw error;
-          allTickets = data || [];
-        } else {
-          // Fallback Local Storage Mode
-          allTickets = getLocalData().sort((a, b) => b.id - a.id);
+    function handleRoleSwitch(newRole) {
+      if (newRole === 'admin') {
+        if (currentRole === 'admin') {
+          showToast('Anda sudah berada dalam peran Administrator.');
+          return;
         }
-      } catch (err) {
-        console.warn('Supabase fetch error, beralih ke local storage:', err.message);
-        allTickets = getLocalData().sort((a, b) => b.id - a.id);
-      } finally {
-        setSubmitLoading(false);
-        applyFilters();
-        updateSummaryCards();
-        generateNewTicketNumberPreview();
+        // Wajib verifikasi kata sandi untuk beralih ke admin
+        openAdminPasswordModal();
+        return;
+      }
+
+      // Jika beralih ke Mahasiswa, tidak perlu memasukkan kata sandi
+      executeRoleSwitch('mahasiswa');
+    }
+
+    function executeRoleSwitch(newRole) {
+      currentRole = newRole;
+      localStorage.setItem('APP_USER_ROLE', newRole);
+      applyRBAC();
+
+      const roleName = newRole === 'admin' ? '🛡️ Administrator (Akses Penuh)' : '🎓 Mahasiswa (Pelapor)';
+      showToast(`Peran aktif beralih ke: ${roleName}`);
+
+      // TRANSISI OTOMATIS ANTAR HALAMAN BERDASARKAN ROLE
+      if (newRole === 'admin') {
+        // Jika beralih ke Admin, langsung buka halaman Antrean Aspirasi (Page 3) agar perubahan langsung terlihat!
+        switchPage('page3');
+      } else {
+        // Jika beralih ke Mahasiswa dan sedang berada di halaman Antrean (Page 3), kembalikan ke Form Aspirasi (Page 1)
+        const p3View = document.getElementById('view-page3');
+        if (p3View && !p3View.classList.contains('hidden')) {
+          switchPage('page1');
+        }
       }
     }
 
-    // -------------------------------------------------------------------
-    // 3. GENERATOR NOMOR TIKET OTOMATIS (Sesuai Format Penpot / SKPL)
-    // -------------------------------------------------------------------
-    function generateNewTicketNumberPreview() {
-      if (isEditing) return; // Jangan ubah nomor jika sedang edit
-      const currentYear = new Date().getFullYear();
-      let maxNum = 0;
-      allTickets.forEach(t => {
-        if (t.nomor_tiket) {
-          const parts = t.nomor_tiket.split('-');
-          if (parts.length >= 3) {
-            const num = parseInt(parts[2], 10);
-            if (!isNaN(num) && num > maxNum) maxNum = num;
+    function toggleRoleQA() {
+      const nextRole = currentRole === 'admin' ? 'mahasiswa' : 'admin';
+      handleRoleSwitch(nextRole);
+    }
+
+    /* Modal Autentikasi Kata Sandi Admin */
+    function openAdminPasswordModal() {
+      const modal = document.getElementById('adminPasswordModal');
+      const passInput = document.getElementById('adminPasswordInput');
+      const errorBox = document.getElementById('adminPasswordError');
+
+      if (errorBox) errorBox.classList.add('hidden');
+      if (passInput) {
+        passInput.value = '';
+        passInput.classList.remove('border-rose-400', 'focus:border-rose-500', 'focus:ring-rose-200');
+      }
+      if (modal) modal.classList.remove('hidden');
+
+      setTimeout(() => {
+        if (passInput) passInput.focus();
+      }, 120);
+    }
+
+    function closeAdminPasswordModal() {
+      const modal = document.getElementById('adminPasswordModal');
+      if (modal) modal.classList.add('hidden');
+
+      // Kembalikan sinkronisasi visual ke role saat ini
+      applyRBAC();
+    }
+
+    function toggleShowAdminPassword() {
+      const input = document.getElementById('adminPasswordInput');
+      const icon = document.getElementById('adminPasswordEyeIcon');
+      if (!input || !icon) return;
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = `
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"></path>
+          </svg>
+        `;
+      } else {
+        input.type = 'password';
+        icon.innerHTML = `
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+        `;
+      }
+    }
+
+    function submitAdminPassword() {
+      const passInput = document.getElementById('adminPasswordInput');
+      const errorBox = document.getElementById('adminPasswordError');
+      const errorText = document.getElementById('adminPasswordErrorText');
+      const inputVal = passInput ? passInput.value.trim() : '';
+
+      if (inputVal === ADMIN_PASSWORD) {
+        // Kata sandi benar!
+        closeAdminPasswordModal();
+        executeRoleSwitch('admin');
+        showToast('🛡️ Otorisasi Berhasil! Selamat datang, Administrator.');
+      } else {
+        // Kata sandi salah!
+        if (errorBox) errorBox.classList.remove('hidden');
+        if (errorText) errorText.textContent = 'Kata sandi salah! Akses Administrator ditolak.';
+        if (passInput) {
+          passInput.classList.add('border-rose-400', 'focus:border-rose-500', 'focus:ring-rose-200');
+          passInput.focus();
+          passInput.select();
+        }
+      }
+    }
+
+    function applyRBAC() {
+      // 1. Sinkronisasi Selector Dropdown di Sidebar
+      const selector = document.getElementById('roleSelector');
+      if (selector) selector.value = currentRole;
+
+      // 2. Sinkronisasi Tombol Cepat di Top Header
+      const btnHeaderMhs = document.getElementById('toggleHeaderMahasiswa');
+      const btnHeaderAdm = document.getElementById('toggleHeaderAdmin');
+      const adminBanner = document.getElementById('adminModeBanner');
+
+      // 3. Elemen-elemen visual role
+      const badgeIndicator = document.getElementById('roleBadgeIndicator');
+      const topRoleBadge = document.getElementById('topHeaderRoleBadge');
+      const topRoleText = document.getElementById('topHeaderRoleText');
+      const topRoleDot = document.getElementById('topHeaderRoleDot');
+      const userAvatar = document.getElementById('userAvatar');
+      const userNameDisplay = document.getElementById('userNameDisplay');
+      const userRoleDesc = document.getElementById('userRoleDesc');
+      const navPage3 = document.getElementById('nav-page3');
+      const navLockBadge = document.getElementById('navLockBadge');
+      const qaRolePill = document.getElementById('qaRolePill');
+      const btnPage2ToPage3Text = document.getElementById('btnPage2ToPage3Text');
+
+      if (currentRole === 'admin') {
+        // ================= MODE ADMINISTRATOR (FULL ACCESS) =================
+        if (btnHeaderAdm) {
+          btnHeaderAdm.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs bg-slate-900 text-white';
+        }
+        if (btnHeaderMhs) {
+          btnHeaderMhs.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-500 hover:text-slate-900';
+        }
+        if (adminBanner) {
+          adminBanner.classList.remove('hidden');
+        }
+
+        if (badgeIndicator) {
+          badgeIndicator.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200';
+          badgeIndicator.textContent = 'Administrator';
+        }
+        if (topRoleBadge) {
+          topRoleBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+        }
+        if (topRoleText) topRoleText.textContent = 'Role: Administrator (Akses Penuh)';
+        if (topRoleDot) topRoleDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse';
+
+        if (userAvatar) {
+          userAvatar.className = 'w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs shrink-0';
+          userAvatar.textContent = 'AD';
+        }
+        if (userNameDisplay) userNameDisplay.textContent = 'Admin Help Desk';
+        if (userRoleDesc) userRoleDesc.textContent = 'Petugas • Biro TI & Sarana';
+
+        if (navLockBadge) {
+          navLockBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1';
+          navLockBadge.innerHTML = `
+            <svg class="w-2.5 h-2.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span>Akses Penuh</span>
+          `;
+        }
+        if (navPage3) {
+          navPage3.classList.remove('opacity-60');
+          navPage3.title = 'Akses Antrean Terbuka untuk Admin';
+        }
+        if (qaRolePill) {
+          qaRolePill.className = 'text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800';
+          qaRolePill.textContent = 'Admin (Full)';
+        }
+        if (btnPage2ToPage3Text) {
+          btnPage2ToPage3Text.textContent = 'Kelola di Antrean Aspirasi (Admin) →';
+        }
+
+      } else {
+        // ================= MODE MAHASISWA (RESTRICTED ACCESS) =================
+        if (btnHeaderMhs) {
+          btnHeaderMhs.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs bg-indigo-600 text-white';
+        }
+        if (btnHeaderAdm) {
+          btnHeaderAdm.className = 'px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-500 hover:text-slate-900';
+        }
+        if (adminBanner) {
+          adminBanner.classList.add('hidden');
+        }
+
+        if (badgeIndicator) {
+          badgeIndicator.className = 'text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200';
+          badgeIndicator.textContent = 'Mahasiswa';
+        }
+        if (topRoleBadge) {
+          topRoleBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200';
+        }
+        if (topRoleText) topRoleText.textContent = 'Role: Mahasiswa';
+        if (topRoleDot) topRoleDot.className = 'w-1.5 h-1.5 rounded-full bg-indigo-600';
+
+        if (userAvatar) {
+          userAvatar.className = 'w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs shrink-0';
+          const inputPelapor = document.getElementById('nama_pelapor');
+          const nameVal = inputPelapor ? inputPelapor.value.trim() : '';
+          if (nameVal) {
+            userAvatar.textContent = nameVal.split(' ').filter(Boolean).map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'M';
+          } else {
+            userAvatar.textContent = 'M';
           }
         }
-      });
-      const nextSeq = String(maxNum + 1).padStart(4, '0');
-      document.getElementById('nomor_tiket').value = `ADU-${currentYear}-${nextSeq}`;
+        if (userNameDisplay) {
+          const inputPelapor = document.getElementById('nama_pelapor');
+          userNameDisplay.textContent = (inputPelapor && inputPelapor.value.trim()) ? inputPelapor.value.trim() : 'Mahasiswa';
+        }
+        if (userRoleDesc) userRoleDesc.textContent = 'Pelapor • Sivitas Kampus';
+
+        if (navLockBadge) {
+          navLockBadge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 flex items-center gap-1';
+          navLockBadge.innerHTML = `
+            <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span>Khusus Admin</span>
+          `;
+        }
+        if (navPage3) {
+          navPage3.classList.add('opacity-75');
+          navPage3.title = 'Terkunci: Khusus Role Admin';
+        }
+        if (qaRolePill) {
+          qaRolePill.className = 'text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800';
+          qaRolePill.textContent = 'Mahasiswa';
+        }
+        if (btnPage2ToPage3Text) {
+          btnPage2ToPage3Text.textContent = 'Lihat Panduan & SOP →';
+        }
+
+        // Jangan prefill nama pengguna, biarkan kosong agar diisi manual oleh mahasiswa
+        const inputPelapor = document.getElementById('nama_pelapor');
+        if (inputPelapor && inputPelapor.value === 'Admin Help Desk') {
+          inputPelapor.value = '';
+        }
+      }
     }
 
-    // -------------------------------------------------------------------
-    // 4. VALIDASI LOGIKA KETAT BLACK BOX (TC-01 & TC-02)
-    // -------------------------------------------------------------------
-    async function handleFormSubmit(e) {
-      e.preventDefault();
-      hideErrorAlert();
-      hideSuccessAlert();
+    function openAccessDeniedModal(featureName) {
+      document.getElementById('deniedFeatureName').textContent = featureName || 'Antrean Aspirasi';
+      document.getElementById('accessDeniedModal').classList.remove('hidden');
+    }
 
-      const editId = document.getElementById('editRecordId').value;
-      const nomorTiket = document.getElementById('nomor_tiket').value.trim();
-      const namaPelapor = document.getElementById('nama_pelapor').value.trim();
-      const kategori = document.getElementById('kategori').value;
-      const deskripsi = document.getElementById('deskripsi').value.trim();
-      const status = document.getElementById('status').value;
+    function closeAccessDeniedModal() {
+      document.getElementById('accessDeniedModal').classList.add('hidden');
+    }
 
-      // =================================================================
-      // IMPLEMENTASI TC-01: Submit Laporan Kosong
-      // Validasi logika di sisi JavaScript: Deskripsi TIDAK BOLEH kosong/spasi!
-      // =================================================================
-      if (!deskripsi || deskripsi.length === 0) {
-        // Tampilkan kotak Alert Error warna merah PERSIS teks SKPL TC-01:
-        showErrorAlert("Deskripsi wajib diisi");
-        document.getElementById('deskripsi').focus();
-        return; // Hentikan eksekusi segera, tolak simpan ke Supabase!
+    function elevateToAdminAndOpen() {
+      closeAccessDeniedModal();
+      handleRoleSwitch('admin');
+    }
+
+    function handlePage2NextClick() {
+      if (currentRole === 'admin') {
+        switchPage('page3');
+      } else {
+        switchPage('panduan');
+      }
+    }
+
+    /* =========================================================================
+       2B. LOGIKA & INTERAKSI BERANDA / DASHBOARD UTAMA
+       ========================================================================= */
+    function focusTicketTracker() {
+      const input = document.getElementById('homeTicketInput');
+      if (input) {
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        input.focus();
+      }
+    }
+
+    function handleQuickLookupTicket() {
+      const input = document.getElementById('homeTicketInput');
+      const err = document.getElementById('homeLookupError');
+      const val = input ? input.value.trim().toUpperCase() : '';
+
+      if (!val) {
+        if (err) {
+          err.textContent = 'Silakan masukkan nomor tiket terlebih dahulu.';
+          err.classList.remove('hidden');
+        }
+        if (input) input.focus();
+        return;
       }
 
-      if (!namaPelapor || namaPelapor.length === 0) {
-        showErrorAlert("Nama pelapor wajib diisi");
+      const found = ticketsState.find(t => t.nomor_tiket.toUpperCase() === val);
+      if (found) {
+        if (err) err.classList.add('hidden');
+        populatePage2(found);
+        switchPage('page2');
+        showToast(`Nomor tiket ${found.nomor_tiket} ditemukan! Menampilkan status terkini.`);
+      } else {
+        if (err) {
+          err.textContent = `Nomor tiket "${val}" tidak ditemukan dalam sistem. Pastikan format: ASP-XXXXXX.`;
+          err.classList.remove('hidden');
+        }
+        showToast(`Tiket "${val}" tidak ditemukan.`);
+      }
+    }
+
+    function quickSelectCategoryAndReport(catName) {
+      const select = document.getElementById('kategori');
+      if (select) {
+        select.value = catName;
+      }
+      switchPage('page1');
+      showToast(`Kategori '${catName}' dipilih. Silakan lengkapi formulir.`);
+      setTimeout(() => {
+        const desc = document.getElementById('deskripsi');
+        if (desc) desc.focus();
+      }, 200);
+    }
+
+    function updateDashboardStats() {
+      const elTotal = document.getElementById('statTotalTickets');
+      const elDiproses = document.getElementById('statDiprosesTickets');
+      const elSelesai = document.getElementById('statSelesaiTickets');
+      const listResolved = document.getElementById('homeRecentResolvedList');
+
+      if (elTotal) elTotal.textContent = ticketsState.length;
+      if (elDiproses) elDiproses.textContent = ticketsState.filter(t => t.status === 'Diproses').length;
+      if (elSelesai) elSelesai.textContent = ticketsState.filter(t => t.status === 'Selesai').length;
+
+      if (listResolved) {
+        listResolved.innerHTML = '';
+        const resolved = ticketsState.filter(t => t.status === 'Selesai').slice(0, 2);
+        if (resolved.length === 0) {
+          listResolved.innerHTML = `
+            <div class="col-span-full p-4 rounded-xl bg-slate-50 border border-slate-100 text-xs text-slate-400 text-center">
+              Belum ada laporan yang diselesaikan baru-baru ini.
+            </div>
+          `;
+        } else {
+          resolved.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs space-y-2 cursor-pointer hover:border-indigo-300 transition-all';
+            
+            const topDiv = document.createElement('div');
+            topDiv.className = 'flex items-center justify-between';
+            
+            const badgeNomor = document.createElement('span');
+            badgeNomor.className = 'font-mono font-bold text-xs text-indigo-700';
+            badgeNomor.textContent = item.nomor_tiket;
+            
+            const badgeStatus = document.createElement('span');
+            badgeStatus.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200';
+            badgeStatus.textContent = 'Selesai';
+            
+            topDiv.appendChild(badgeNomor);
+            topDiv.appendChild(badgeStatus);
+            card.appendChild(topDiv);
+
+            const katP = document.createElement('p');
+            katP.className = 'text-xs text-slate-700 font-bold truncate';
+            katP.textContent = item.kategori;
+            card.appendChild(katP);
+
+            const descP = document.createElement('p');
+            descP.className = 'text-[11px] text-slate-500 line-clamp-2 leading-relaxed';
+            descP.textContent = item.deskripsi;
+            card.appendChild(descP);
+
+            card.addEventListener('click', () => {
+              populatePage2(item);
+              switchPage('page2');
+            });
+
+            listResolved.appendChild(card);
+          });
+        }
+      }
+    }
+
+    /* =========================================================================
+       3. SISTEM NAVIGASI INTERAKTIF MULTI-PAGE DENGAN ENFORCEMENT RBAC
+       ========================================================================= */
+    function switchPage(pageId) {
+      // PENEGAKAN KEAMANAN RBAC:
+      // Mahasiswa HANYA BISA membuka home, page1 (Kirim Aspirasi), page2 (Nomor Tiket & Status), dan panduan (Panduan SOP)!
+      if (pageId === 'page3' && currentRole !== 'admin') {
+        openAccessDeniedModal('Antrean Aspirasi');
+        return; // Blokir akses
+      }
+
+      // Sembunyikan seluruh page view
+      document.querySelectorAll('.page-view').forEach(view => {
+        view.classList.add('hidden');
+      });
+
+      // Tampilkan page view yang dituju
+      const targetView = document.getElementById(`view-${pageId}`);
+      if (targetView) {
+        targetView.classList.remove('hidden');
+        targetView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      // Perbarui style aktif navigasi sidebar
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.className = 'nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer';
+      });
+
+      const activeNav = document.getElementById(`nav-${pageId}`);
+      if (activeNav) {
+        activeNav.className = 'nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all bg-slate-900 text-white shadow-xs cursor-pointer';
+      }
+
+      // Update konten dinamis sesuai halaman yang dibuka
+      if (pageId === 'home') {
+        updateDashboardStats();
+      } else if (pageId === 'page3') {
+        renderPage3Table();
+      }
+    }
+
+    /* =========================================================================
+       4. TOAST NOTIFICATION PERSIS DESAIN PENPOT
+       ========================================================================= */
+    function showToast(message) {
+      const toast = document.getElementById('penpotToast');
+      const toastMsg = document.getElementById('toastMessage');
+      toastMsg.textContent = message;
+      toast.classList.remove('hidden');
+
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+
+    function copyTicketNumber() {
+      const ticketNum = document.getElementById('displayTicketNumber').textContent.trim();
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(ticketNum);
+      }
+      showToast(`Nomor tiket ${ticketNum} berhasil disalin ke clipboard!`);
+    }
+
+    /* =========================================================================
+       5. INTERAKSI FAQ ACCORDION & MODAL BANTUAN
+       ========================================================================= */
+    function toggleFaq(id) {
+      const content = document.getElementById(`${id}-content`);
+      const icon = document.getElementById(`${id}-icon`);
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.innerHTML = '&minus;';
+      } else {
+        content.classList.add('hidden');
+        icon.innerHTML = '&plus;';
+      }
+    }
+
+    function openContactModal() {
+      document.getElementById('contactModal').classList.remove('hidden');
+    }
+
+    function closeContactModal() {
+      document.getElementById('contactModal').classList.add('hidden');
+    }
+
+    /* =========================================================================
+       6. VALIDASI & SUBMIT FORM ASPIRASI (PAGE 1 -> PAGE 2)
+       ========================================================================= */
+    async function handleAspirationSubmit(e) {
+      e.preventDefault();
+      hideValidationError();
+
+      const nomor_tiket = document.getElementById('nomor_tiket').value.trim();
+      const nama_pelapor = document.getElementById('nama_pelapor').value.trim();
+      const kategori = document.getElementById('kategori').value;
+      const deskripsiInput = document.getElementById('deskripsi');
+      const deskripsi = deskripsiInput.value.trim();
+
+      /* =========================================================================
+         VALIDASI BLACK BOX TC-01:
+         Jika deskripsi kosong atau hanya spasi, munculkan error persis Penpot!
+         ========================================================================= */
+      if (!deskripsi) {
+        showValidationError('Deskripsi wajib diisi - Berikan rincian laporan minimal keterangan singkat kendala.');
+        deskripsiInput.classList.add('border-rose-400', 'focus:border-rose-500', 'focus:ring-rose-200');
+        deskripsiInput.focus();
+        return; // Hentikan penyimpanan
+      }
+
+      if (!nama_pelapor) {
+        showValidationError('Nama pelapor wajib diisi.');
         document.getElementById('nama_pelapor').focus();
         return;
       }
 
       setSubmitLoading(true);
 
-      const recordPayload = {
-        nomor_tiket: nomorTiket,
-        nama_pelapor: namaPelapor,
-        kategori: kategori,
-        deskripsi: deskripsi,
-        status: status,
+      const newTicket = {
+        id: Date.now(),
+        nomor_tiket,
+        nama_pelapor,
+        kategori,
+        deskripsi,
+        status: 'Pending',
+        created_at: new Date().toISOString()
       };
 
       try {
-        if (editId) {
-          // ===============================================================
-          // IMPLEMENTASI TC-02: Update Status Tiket
-          // Memperbarui status ke 'Diproses' atau status lain pada database
-          // ===============================================================
-          if (supabaseClient) {
-            const { error } = await supabaseClient
-              .from('tickets')
-              .update(recordPayload)
-              .eq('id', editId);
-            if (error) throw error;
-          } else {
-            const data = getLocalData();
-            const idx = data.findIndex(item => item.id == editId);
-            if (idx !== -1) {
-              data[idx] = { ...data[idx], ...recordPayload };
-              saveLocalData(data);
-            }
-          }
-          showSuccessAlert(`Status tiket ${nomorTiket} berhasil diperbarui menjadi "${status}".`);
-          cancelEditMode();
-        } else {
-          // INSERT Fitur Create
-          if (supabaseClient) {
-            const { error } = await supabaseClient
-              .from('tickets')
-              .insert([recordPayload]);
-            if (error) throw error;
-          } else {
-            const data = getLocalData();
-            const newRecord = {
-              id: Date.now(),
-              ...recordPayload,
-              created_at: new Date().toISOString()
-            };
-            data.unshift(newRecord);
-            saveLocalData(data);
-          }
-          showSuccessAlert(`Tiket aduan ${nomorTiket} berhasil diterbitkan.`);
-          resetFormInputs();
-        }
-
-        await fetchTickets();
-      } catch (err) {
-        console.error('Error saat menyimpan data:', err);
-        showErrorAlert(err.message || 'Gagal menyimpan ke database Supabase.');
-      } finally {
-        setSubmitLoading(false);
-      }
-    }
-
-    // -------------------------------------------------------------------
-    // 5. IMPLEMENTASI MUTLAK ANTI-XSS (SEC-01) - createSafeTransactionRow
-    // -------------------------------------------------------------------
-    // DILARANG KERAS menggunakan .innerHTML langsung dengan string pengguna!
-    // Kita gunakan document.createElement() dan .textContent murni.
-    function createSafeTransactionRow(item) {
-      const tr = document.createElement('tr');
-      tr.className = "hover:bg-slate-50/80 transition-colors border-b border-slate-100";
-
-      // 1. Kolom Nomor Tiket
-      const tdNomor = document.createElement('td');
-      tdNomor.className = "px-4 py-3.5 text-xs font-semibold text-indigo-600 font-mono whitespace-nowrap";
-      tdNomor.textContent = item.nomor_tiket;
-      tr.appendChild(tdNomor);
-
-      // 2. Kolom Nama Pelapor (Anti-XSS via .textContent)
-      const tdPelapor = document.createElement('td');
-      tdPelapor.className = "px-4 py-3.5 text-xs font-medium text-slate-800 whitespace-nowrap";
-      tdPelapor.textContent = item.nama_pelapor; // Aman dari XSS
-      tr.appendChild(tdPelapor);
-
-      // 3. Kolom Kategori
-      const tdKategori = document.createElement('td');
-      tdKategori.className = "px-4 py-3.5 text-xs text-slate-600 whitespace-nowrap";
-      tdKategori.textContent = item.kategori;
-      tr.appendChild(tdKategori);
-
-      // 4. Kolom Deskripsi (Anti-XSS via .textContent)
-      const tdDeskripsi = document.createElement('td');
-      tdDeskripsi.className = "px-4 py-3.5 text-xs text-slate-600 max-w-xs truncate";
-      tdDeskripsi.title = item.deskripsi; // Tooltip saat hover
-      tdDeskripsi.textContent = item.deskripsi; // Aman dari XSS: payload <img src=x> tampil apa adanya
-      tr.appendChild(tdDeskripsi);
-
-      // 5. Kolom Status Badge
-      const tdStatus = document.createElement('td');
-      tdStatus.className = "px-4 py-3.5 whitespace-nowrap";
-      const statusBadge = document.createElement('span');
-      statusBadge.className = getStatusBadgeClasses(item.status);
-      statusBadge.textContent = item.status;
-      tdStatus.appendChild(statusBadge);
-      tr.appendChild(tdStatus);
-
-      // 6. Kolom Aksi (Edit & Hapus)
-      const tdAksi = document.createElement('td');
-      tdAksi.className = "px-4 py-3.5 text-right whitespace-nowrap text-xs space-x-2";
-
-      // Tombol Edit
-      const btnEdit = document.createElement('button');
-      btnEdit.type = 'button';
-      btnEdit.className = "text-indigo-600 hover:text-indigo-900 font-semibold transition cursor-pointer";
-      btnEdit.textContent = "Edit";
-      btnEdit.onclick = () => startEditMode(item);
-      tdAksi.appendChild(btnEdit);
-
-      // Tombol Hapus
-      const btnHapus = document.createElement('button');
-      btnHapus.type = 'button';
-      btnHapus.className = "text-rose-600 hover:text-rose-900 font-semibold transition cursor-pointer";
-      btnHapus.textContent = "Hapus";
-      btnHapus.onclick = () => deleteTicket(item.id, item.nomor_tiket);
-      tdAksi.appendChild(btnHapus);
-
-      tr.appendChild(tdAksi);
-      return tr;
-    }
-
-    function getStatusBadgeClasses(status) {
-      if (status === 'Pending') {
-        return "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200";
-      } else if (status === 'Diproses') {
-        return "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-blue-100 text-blue-800 border border-blue-200";
-      } else if (status === 'Selesai') {
-        return "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200";
-      }
-      return "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800 border border-slate-200";
-    }
-
-    // -------------------------------------------------------------------
-    // 6. FITUR CRUD: UPDATE & DELETE
-    // -------------------------------------------------------------------
-    function startEditMode(item) {
-      isEditing = true;
-      hideErrorAlert();
-      hideSuccessAlert();
-
-      document.getElementById('editRecordId').value = item.id;
-      document.getElementById('nomor_tiket').value = item.nomor_tiket;
-      document.getElementById('nama_pelapor').value = item.nama_pelapor;
-      document.getElementById('kategori').value = item.kategori;
-      document.getElementById('deskripsi').value = item.deskripsi;
-      document.getElementById('status').value = item.status;
-
-      document.getElementById('formTitle').textContent = `Edit Tiket: ${item.nomor_tiket}`;
-      document.getElementById('formSubtitle').textContent = "Ubah status penanganan atau perbarui detail aduan.";
-      document.getElementById('formModeBadge').textContent = "Mode Edit";
-      document.getElementById('formModeBadge').className = "text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full";
-      document.getElementById('btnSubmitText').textContent = "Simpan Perubahan";
-      document.getElementById('btnCancelEdit').classList.remove('hidden');
-
-      // Scroll form ke tampilan
-      document.getElementById('ticketForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    function cancelEditMode() {
-      isEditing = false;
-      document.getElementById('editRecordId').value = '';
-      resetFormInputs();
-
-      document.getElementById('formTitle').textContent = "Buat Pengaduan";
-      document.getElementById('formSubtitle').textContent = "Isi detail kendala atau aspirasi. Nomor tiket diterbitkan otomatis.";
-      document.getElementById('formModeBadge').textContent = "Mode Input";
-      document.getElementById('formModeBadge').className = "text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded-full";
-      document.getElementById('btnSubmitText').textContent = "Kirim Pengaduan";
-      document.getElementById('btnCancelEdit').classList.add('hidden');
-
-      generateNewTicketNumberPreview();
-    }
-
-    async function deleteTicket(id, nomorTiket) {
-      hideErrorAlert();
-      hideSuccessAlert();
-
-      const yakin = confirm(`Apakah Anda yakin ingin menghapus tiket "${nomorTiket}"?`);
-      if (!yakin) return;
-
-      setSubmitLoading(true);
-      try {
-        if (supabaseClient) {
+        if (isCloudMode && supabaseClient) {
           const { error } = await supabaseClient
             .from('tickets')
-            .delete()
-            .eq('id', id);
+            .insert([newTicket]);
           if (error) throw error;
         } else {
-          let data = getLocalData();
-          data = data.filter(item => item.id != id);
-          saveLocalData(data);
+          ticketsState.unshift(newTicket);
+          saveLocalStorage(ticketsState);
         }
-        showSuccessAlert(`Tiket ${nomorTiket} berhasil dihapus.`);
-        if (document.getElementById('editRecordId').value == id) {
-          cancelEditMode();
-        }
-        await fetchTickets();
+
+        // Tampilkan data pada PAGE 2
+        populatePage2(newTicket);
+        updateDashboardStats();
+
+        // TRANSISI OTOMATIS DARI PAGE 1 KE PAGE 2!
+        switchPage('page2');
+        showToast('Aspirasi berhasil dikirim dan terdaftar!');
+
+        // Siapkan nomor baru untuk form selanjutnya
+        setTimeout(generateNewTicketId, 500);
       } catch (err) {
-        console.error('Error saat menghapus:', err);
-        showErrorAlert(err.message || 'Gagal menghapus tiket dari database.');
+        console.error('Gagal simpan tiket:', err);
+        showValidationError('Terjadi kendala saat menyimpan: ' + err.message);
       } finally {
         setSubmitLoading(false);
       }
     }
 
-    function resetFormInputs() {
-      document.getElementById('nama_pelapor').value = '';
-      document.getElementById('deskripsi').value = '';
-      document.getElementById('status').value = 'Pending';
-      document.getElementById('kategori').value = 'Kendala Teknis';
+    function showValidationError(message) {
+      const errBox = document.getElementById('validationErrorBox');
+      const errMsg = document.getElementById('validationErrorMessage');
+      errMsg.textContent = message;
+      errBox.classList.remove('hidden');
     }
 
-    // -------------------------------------------------------------------
-    // 7. PENCARIAN & FILTER INTERAKTIF
-    // -------------------------------------------------------------------
-    function applyFilters() {
-      const searchKeyword = (document.getElementById('searchInput').value || '').toLowerCase().trim();
-      const statusFilter = document.getElementById('filterStatus').value;
-      const kategoriFilter = document.getElementById('filterKategori').value;
-
-      const filtered = allTickets.filter(item => {
-        const matchSearch = !searchKeyword ||
-          (item.nomor_tiket && item.nomor_tiket.toLowerCase().includes(searchKeyword)) ||
-          (item.nama_pelapor && item.nama_pelapor.toLowerCase().includes(searchKeyword)) ||
-          (item.deskripsi && item.deskripsi.toLowerCase().includes(searchKeyword));
-
-        const matchStatus = (statusFilter === 'ALL') || (item.status === statusFilter);
-        const matchKategori = (kategoriFilter === 'ALL') || (item.kategori === kategoriFilter);
-
-        return matchSearch && matchStatus && matchKategori;
-      });
-
-      renderTable(filtered);
+    function hideValidationError() {
+      document.getElementById('validationErrorBox').classList.add('hidden');
+      document.getElementById('deskripsi').classList.remove('border-rose-400', 'focus:border-rose-500', 'focus:ring-rose-200');
     }
 
-    function renderTable(tickets) {
-      const tbody = document.getElementById('ticketTableBody');
-      const emptyState = document.getElementById('emptyState');
-      const countBadge = document.getElementById('tableRecordCount');
-
-      tbody.innerHTML = '';
-      countBadge.textContent = `${tickets.length} Laporan`;
-
-      if (tickets.length === 0) {
-        emptyState.classList.remove('hidden');
-      } else {
-        emptyState.classList.add('hidden');
-        tickets.forEach(ticket => {
-          // Render aman melalui createSafeTransactionRow (Anti-XSS SEC-01)
-          const row = createSafeTransactionRow(ticket);
-          tbody.appendChild(row);
-        });
-      }
-    }
-
-    function updateSummaryCards() {
-      const total = allTickets.length;
-      const proses = allTickets.filter(t => t.status === 'Pending' || t.status === 'Diproses').length;
-      const selesai = allTickets.filter(t => t.status === 'Selesai').length;
-
-      document.getElementById('statTotal').textContent = total;
-      document.getElementById('statProses').textContent = proses;
-      document.getElementById('statSelesai').textContent = selesai;
-    }
-
-    // -------------------------------------------------------------------
-    // 8. PANEL SIMULASI PENGUJIAN 1-KLIK (QA & SECURITY HELPER BAR)
-    // -------------------------------------------------------------------
-
-    // TC-01: Submit Laporan Kosong -> Verifikasi Pesan "Deskripsi wajib diisi"
-    function runTestTC01() {
-      cancelEditMode();
-      document.getElementById('nama_pelapor').value = 'Tester Black Box QA';
-      document.getElementById('kategori').value = 'Kendala Teknis';
-      document.getElementById('deskripsi').value = ''; // KOSONGKAN DESKRIPSI
-      document.getElementById('status').value = 'Pending';
-
-      // Panggil submit
-      document.getElementById('ticketForm').dispatchEvent(new Event('submit'));
-    }
-
-    // TC-02: Update Status Tiket -> Verifikasi pembaruan status ke 'Diproses'
-    function runTestTC02() {
-      if (allTickets.length === 0) {
-        showErrorAlert("Tidak ada data tiket untuk diuji update status.");
-        return;
-      }
-      // Pilih tiket pertama
-      const targetTicket = allTickets[0];
-      startEditMode(targetTicket);
-      document.getElementById('status').value = 'Diproses'; // Ubah status ke Diproses
-
-      // Panggil submit
-      document.getElementById('ticketForm').dispatchEvent(new Event('submit'));
-    }
-
-    // SEC-01: Uji Anti-XSS Payload
-    function runTestSEC01() {
-      cancelEditMode();
-      document.getElementById('nama_pelapor').value = 'Security Auditor <b onmouseover=alert(1)>SEC</b>';
-      document.getElementById('kategori').value = 'Kendala Teknis';
-      // Injeksi payload XSS berbahaya:
-      document.getElementById('deskripsi').value = '<img src=x onerror=alert("Jebol XSS!")>';
-      document.getElementById('status').value = 'Pending';
-
-      // Panggil submit
-      document.getElementById('ticketForm').dispatchEvent(new Event('submit'));
-    }
-
-    // -------------------------------------------------------------------
-    // 9. HELPER UI & ALERT SYSTEM
-    // -------------------------------------------------------------------
-    function showErrorAlert(message) {
-      const box = document.getElementById('errorAlertBox');
-      const text = document.getElementById('errorMessageText');
-      text.textContent = message;
-      box.classList.remove('hidden');
-      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    function hideErrorAlert() {
-      document.getElementById('errorAlertBox').classList.add('hidden');
-    }
-
-    function showSuccessAlert(message) {
-      const box = document.getElementById('successAlertBox');
-      const text = document.getElementById('successMessageText');
-      text.textContent = message;
-      box.classList.remove('hidden');
-      setTimeout(hideSuccessAlert, 6000);
-    }
-
-    function hideSuccessAlert() {
-      document.getElementById('successAlertBox').classList.add('hidden');
+    function resetFormAspirasi() {
+      document.getElementById('aspirationForm').reset();
+      generateNewTicketId();
+      hideValidationError();
     }
 
     function setSubmitLoading(isLoading) {
-      const btn = document.getElementById('btnSubmit');
+      const btn = document.getElementById('btnSubmitAspirasi');
+      const text = document.getElementById('btnSubmitText');
       const spinner = document.getElementById('submitSpinner');
+
       if (isLoading) {
         btn.disabled = true;
         btn.classList.add('opacity-75', 'cursor-not-allowed');
         spinner.classList.remove('hidden');
+        text.textContent = 'Mengirim...';
       } else {
         btn.disabled = false;
         btn.classList.remove('opacity-75', 'cursor-not-allowed');
         spinner.classList.add('hidden');
+        text.textContent = 'Kirim Aspirasi →';
       }
     }
 
-    function toggleConfigModal() {
-      const modal = document.getElementById('configModal');
-      modal.classList.toggle('hidden');
+    /* =========================================================================
+       7. POPULATE PAGE 2 (NOMOR TIKET & STATUS)
+       ========================================================================= */
+    function populatePage2(ticket) {
+      currentSelectedTicket = ticket;
+
+      // Nomor tiket
+      document.getElementById('displayTicketNumber').textContent = ticket.nomor_tiket;
+
+      // Pelapor, kategori, deskripsi (MUTLAK ANTI-XSS DENGAN .textContent)
+      document.getElementById('displayNamaPelapor').textContent = ticket.nama_pelapor;
+      document.getElementById('displayKategori').textContent = ticket.kategori;
+      document.getElementById('displayDeskripsi').textContent = ticket.deskripsi;
+
+      // Format Waktu
+      const dateObj = new Date(ticket.created_at || Date.now());
+      document.getElementById('displayCreatedDate').textContent = dateObj.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      // Update Stepper
+      updateStepperDisplay(ticket.status);
     }
 
-    // -------------------------------------------------------------------
-    // 10. SETUP INISIALISASI HALAMAN
-    // -------------------------------------------------------------------
-    window.addEventListener('DOMContentLoaded', () => {
-      // Periksa status koneksi
-      const badge = document.getElementById('statusBadge');
-      const badgeText = document.getElementById('statusBadgeText');
-      const banner = document.getElementById('connectionBanner');
+    function updateStepperDisplay(status) {
+      const diprosesBox = document.getElementById('step-diproses-box');
+      const diprosesIcon = document.getElementById('step-diproses-icon');
+      const selesaiBox = document.getElementById('step-selesai-box');
+      const selesaiIcon = document.getElementById('step-selesai-icon');
 
-      if (isCloudSupabase) {
-        badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 transition-all";
-        badgeText.textContent = "Cloud Supabase Active";
-        banner.classList.add('hidden'); // Sembunyikan banner jika cloud sudah aktif
+      if (status === 'Pending') {
+        diprosesBox.classList.add('opacity-40');
+        diprosesIcon.className = 'w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-1.5 border border-slate-200';
+        selesaiBox.classList.add('opacity-40');
+        selesaiIcon.className = 'w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-1.5 border border-slate-200';
+      } else if (status === 'Diproses') {
+        diprosesBox.classList.remove('opacity-40');
+        diprosesIcon.className = 'w-9 h-9 rounded-full bg-sky-600 text-white flex items-center justify-center mb-1.5 shadow-xs';
+        selesaiBox.classList.add('opacity-40');
+        selesaiIcon.className = 'w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-1.5 border border-slate-200';
+      } else if (status === 'Selesai') {
+        diprosesBox.classList.remove('opacity-40');
+        diprosesIcon.className = 'w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center mb-1.5 shadow-xs';
+        selesaiBox.classList.remove('opacity-40');
+        selesaiIcon.className = 'w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center mb-1.5 shadow-xs';
+      }
+    }
+
+    /* =========================================================================
+       8. RENDER TABEL ANTREAN PAGE 3 (ANTI-XSS SEC-01)
+       ========================================================================= */
+    function renderPage3Table() {
+      const tbody = document.getElementById('p3TableBody');
+      const filter = document.getElementById('p3FilterStatus').value;
+      const countBadge = document.getElementById('p3RecordBadge');
+
+      tbody.innerHTML = '';
+
+      const filtered = ticketsState.filter(t => filter === 'Semua' || t.status === filter);
+      countBadge.textContent = `${filtered.length} Tiket`;
+
+      filtered.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition-colors cursor-pointer ' + 
+          (currentSelectedTicket && currentSelectedTicket.id === item.id ? 'bg-indigo-50/50' : '');
+
+        // 1. Nomor Tiket
+        const tdNomor = document.createElement('td');
+        tdNomor.className = 'px-4 py-3 font-mono font-bold text-slate-900';
+        tdNomor.textContent = item.nomor_tiket;
+        tr.appendChild(tdNomor);
+
+        // 2. Waktu Laporan
+        const tdWaktu = document.createElement('td');
+        tdWaktu.className = 'px-4 py-3 text-slate-400 whitespace-nowrap text-[11px]';
+        tdWaktu.textContent = new Date(item.created_at).toLocaleDateString('id-ID', {
+          day: '2-digit', month: '2-digit', year: 'numeric'
+        });
+        tr.appendChild(tdWaktu);
+
+        // 3. Kategori
+        const tdKategori = document.createElement('td');
+        tdKategori.className = 'px-4 py-3 text-slate-600 whitespace-nowrap';
+        tdKategori.textContent = item.kategori;
+        tr.appendChild(tdKategori);
+
+        // 4. Rincian Aduan (MUTLAK ANTI-XSS DENGAN .textContent)
+        const tdDeskripsi = document.createElement('td');
+        tdDeskripsi.className = 'px-4 py-3 text-slate-700 truncate max-w-xs';
+        tdDeskripsi.textContent = item.deskripsi;
+        tr.appendChild(tdDeskripsi);
+
+        // 5. Status
+        const tdStatus = document.createElement('td');
+        tdStatus.className = 'px-4 py-3 text-center';
+        const badge = document.createElement('span');
+        if (item.status === 'Pending') {
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200';
+        } else if (item.status === 'Diproses') {
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200';
+        } else {
+          badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+        }
+        badge.textContent = item.status;
+        tdStatus.appendChild(badge);
+        tr.appendChild(tdStatus);
+
+        // Event Klik Baris untuk Memilih Tiket
+        tr.addEventListener('click', () => {
+          selectTicketForPage3(item);
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      // Default pilih tiket pertama jika belum ada yang terpilih
+      if (!currentSelectedTicket && filtered.length > 0) {
+        selectTicketForPage3(filtered[0]);
+      }
+    }
+
+    function selectTicketForPage3(ticket) {
+      currentSelectedTicket = ticket;
+      document.getElementById('p3DetailNomor').textContent = ticket.nomor_tiket;
+      document.getElementById('p3DetailPelapor').textContent = ticket.nama_pelapor;
+      document.getElementById('p3DetailKategori').textContent = ticket.kategori;
+      document.getElementById('p3DetailDeskripsi').textContent = ticket.deskripsi;
+      document.getElementById('p3SelectStatus').value = ticket.status;
+
+      const badge = document.getElementById('p3DetailStatusBadge');
+      badge.textContent = ticket.status;
+      if (ticket.status === 'Pending') {
+        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200';
+      } else if (ticket.status === 'Diproses') {
+        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200';
       } else {
-        badge.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 transition-all";
-        badgeText.textContent = "Local Demo Mode";
+        badge.className = 'text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200';
+      }
+    }
+
+    // UPDATE STATUS TIKET (TC-02)
+    async function handleUpdateStatusPage3() {
+      if (!currentSelectedTicket) return;
+
+      const newStatus = document.getElementById('p3SelectStatus').value;
+      const index = ticketsState.findIndex(t => t.id === currentSelectedTicket.id);
+
+      if (index !== -1) {
+        ticketsState[index].status = newStatus;
+        currentSelectedTicket = ticketsState[index];
+
+        if (isCloudMode && supabaseClient) {
+          await supabaseClient
+            .from('tickets')
+            .update({ status: newStatus })
+            .eq('id', currentSelectedTicket.id);
+        } else {
+          saveLocalStorage(ticketsState);
+        }
+
+        renderPage3Table();
+        selectTicketForPage3(currentSelectedTicket);
+        updateDashboardStats();
+        showToast(`Status tiket ${currentSelectedTicket.nomor_tiket} diperbarui menjadi '${newStatus}'!`);
+      }
+    }
+
+    /* =========================================================================
+       9. STORAGE & INISIALISASI
+       ========================================================================= */
+    function loadStorage() {
+      const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (!raw) {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(initialTicketsData));
+        return [...initialTicketsData];
+      }
+      try {
+        return JSON.parse(raw) || [];
+      } catch (e) {
+        return [...initialTicketsData];
+      }
+    }
+
+    function saveLocalStorage(data) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(data));
+    }
+
+    async function initSystem() {
+      const statusBadge = document.getElementById('connectionStatusBadge');
+      const statusText = document.getElementById('connectionStatusText');
+
+      if (isCloudSupabaseConfigured() && window.supabase) {
+        try {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          isCloudMode = true;
+          statusBadge.className = 'flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200';
+          statusText.textContent = 'Cloud Supabase Active';
+
+          const { data } = await supabaseClient.from('tickets').select('*').order('created_at', { ascending: false });
+          ticketsState = data && data.length ? data : loadStorage();
+        } catch (err) {
+          isCloudMode = false;
+          ticketsState = loadStorage();
+        }
+      } else {
+        isCloudMode = false;
+        ticketsState = loadStorage();
       }
 
-      fetchTickets();
-    });
+      // Generate Ticket ID awal
+      generateNewTicketId();
+
+      // Inisialisasi Status RBAC (Role-Based Access Control)
+      applyRBAC();
+
+      // Listeners
+      document.getElementById('aspirationForm').addEventListener('submit', handleAspirationSubmit);
+      document.getElementById('nama_pelapor').addEventListener('input', (e) => {
+        if (currentRole === 'mahasiswa') {
+          const nameVal = e.target.value.trim();
+          document.getElementById('userNameDisplay').textContent = nameVal || 'Mahasiswa';
+          if (nameVal) {
+            const initials = nameVal.split(' ').filter(Boolean).map(w => w[0]).join('').substring(0, 2).toUpperCase();
+            document.getElementById('userAvatar').textContent = initials || 'M';
+          } else {
+            document.getElementById('userAvatar').textContent = 'M';
+          }
+        }
+      });
+      document.getElementById('deskripsi').addEventListener('input', (e) => {
+        document.getElementById('charCount').textContent = `${e.target.value.length} karakter`;
+        if (e.target.value.trim()) hideValidationError();
+      });
+
+      // Hitung metrik ringkasan awal dashboard
+      updateDashboardStats();
+
+      // Default buka Halaman Beranda (Home / Dashboard)
+      switchPage('home');
+    }
+
+    /* =========================================================================
+       10. TOMBOL UJI CEPAT SKPL-06 (TC-01, TC-02, SEC-01 & RBAC)
+       ========================================================================= */
+    function testTC01() {
+      switchPage('page1');
+      document.getElementById('deskripsi').value = '';
+      document.getElementById('deskripsi').focus();
+      showValidationError('Deskripsi wajib diisi - Berikan rincian laporan minimal keterangan singkat kendala.');
+      document.getElementById('deskripsi').classList.add('border-rose-400');
+    }
+
+    function testTC02() {
+      // Karena mahasiswa dibatasi RBAC, alihkan sementara ke role Admin untuk pengujian TC-02
+      if (currentRole !== 'admin') {
+        handleRoleSwitch('admin');
+        showToast('Role otomatis dialihkan ke Admin untuk mendemokan update status (TC-02)!');
+      }
+      switchPage('page3');
+      const item = ticketsState.find(t => t.status === 'Pending') || ticketsState[0];
+      if (item) {
+        selectTicketForPage3(item);
+        document.getElementById('p3SelectStatus').value = 'Diproses';
+        handleUpdateStatusPage3();
+      }
+    }
+
+    function testSEC01() {
+      switchPage('page1');
+      document.getElementById('nama_pelapor').value = '<img src=x onerror=alert(1)>';
+      document.getElementById('deskripsi').value = '<img src="x" onerror="alert(\'Jebol XSS!\')">';
+      hideValidationError();
+      showToast('Payload XSS telah diisikan ke form. Klik "Kirim Aspirasi" untuk membuktikan ketahanan Anti-XSS!');
+    }
+
+    function resetDataSimulasi() {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      localStorage.removeItem('ASPIRASI_PENPOT_TICKETS_V1');
+      ticketsState = JSON.parse(JSON.stringify(initialTicketsData));
+      saveLocalStorage(ticketsState);
+      updateDashboardStats();
+      if (document.getElementById('view-page3') && !document.getElementById('view-page3').classList.contains('hidden')) {
+        renderPage3Table();
+      }
+      showToast('Data simulasi berhasil direset ke data awal kampus!');
+    }
+
+    document.addEventListener('DOMContentLoaded', initSystem);
   </script>
 </body>
-
 </html>

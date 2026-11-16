@@ -3,71 +3,73 @@
 
 ---
 
-## 1. Identitas & Tujuan Aplikasi
-* **Nama Aplikasi:** Sistem Pengaduan dan Aspirasi (Help Desk Ticket Web Application)
-* **Kategori Sistem:** Public Service & Technical Support Ticketing System
-* **Ringkasan Sistem:** Aplikasi web responsif untuk menampung, memproses, dan memantau status pengaduan serta aspirasi pengguna secara transparan, terstruktur, dan akuntabel melalui penomoran tiket otomatis.
-* **Capaian Utama:**
-  1. Tersedianya antarmuka pelaporan keluhan/aspirasi dengan validasi ketat (menolak laporan tanpa deskripsi).
-  2. Penerbitan kode unik tiket pengaduan (`nomor_tiket`) secara otomatis.
-  3. Pelacakan status pengerjaan tiket bertahap (*Pending*, *Diproses*, *Selesai*) secara *real-time*.
-  4. Siklus manajemen tiket komprehensif (Create, Read, Update, Delete) yang aman dari celah Cross-Site Scripting (XSS).
+### 1. Identitas & Tujuan Aplikasi
+* **Nama Aplikasi:** Sistem Pengaduan dan Aspirasi (Help Desk Ticket System)
+* **Ringkasan Sistem:** Aplikasi berbasis web modern untuk menampung, memproses, mengelola, dan memantau status pengaduan serta aspirasi pengguna (mahasiswa/publik) secara terpusat, transparan, dan terstruktur dengan sistem penomoran tiket unik.
+* **Capaian Utama (Main Achievement):** 
+  1. Terbangunnya portal help desk digital yang transparan dan akuntabel.
+  2. Implementasi siklus hidup pengaduan bertahap dengan status: `Pending` $\rightarrow$ `Diproses` $\rightarrow$ `Selesai`.
+  3. Penegakan integritas data melalui validasi form ketat di sisi *client* dan *database* yang dibuktikan dengan kelulusan uji Black Box Testing & Security Testing.
+* **Batasan Sistem (Out of Scope):**
+  * Tidak mencakup otomatisasi SMS / WhatsApp Gateway.
+  * Tidak menyediakan fitur Live Chat *real-time*.
+  * Tidak mencakup eskalasi tiket multi-level lintas instansi secara otomatis.
 
 ---
 
-## 2. Spesifikasi Fungsional Lengkap (CRUD + Kalkulasi & Filter)
+### 2. Spesifikasi Fungsional Lengkap (CRUD, Kalkulasi, Search & Filter)
 
-### 2.1. Pemetaan Kebutuhan Inti SKPL
-* **REQ-01 (Pengajuan Pengaduan):** Pengguna dapat menginput nama pelapor, kategori masalah, dan detail deskripsi aduan untuk menerbitkan tiket aduan baru.
-* **REQ-02 (Manajemen & Pembaruan Status Tiket):** Petugas/pengelola dapat memperbarui tahapan penanganan tiket dari `Pending` $\rightarrow$ `Diproses` $\rightarrow$ `Selesai`.
+#### A. Pemetaan Kebutuhan Inti SKPL
+* **`REQ-01` (Pengajuan Pengaduan):** Pengguna dapat menginput data laporan kendala yang mencakup nama pelapor, kategori, dan deskripsi aduan. Sistem secara otomatis menerbitkan nomor tiket unik (format: `TKT-YYYYMMDD-XXXX`).
+* **`REQ-02` (Manajemen & Pembaruan Tiket):** Petugas/Admin dapat memperbarui status penanganan tiket secara bertahap mulai dari `Pending`, `Diproses`, hingga `Selesai`.
 
-### 2.2. Kelengkapan Siklus CRUD & Fungsionalitas Lanjutan
-* **Fitur Create (Tambah Aduan Baru):**
-  * Pengguna mengisi form: Nama Pelapor, Kategori, dan Deskripsi.
-  * Sistem meng-generate `nomor_tiket` unik otomatis dengan format `TKT-YYYYMMDD-XXXX` (atau nomor urut timestamp).
-  * Default status saat pembuatan adalah `Pending`.
-  * Memiliki validasi sisi klien (JavaScript) dan validasi database: field deskripsi tidak boleh kosong/hanya spasi.
-* **Fitur Read (Tabel Data & Metrik Ringkasan):**
-  * **Kartu Ringkasan (KPI/Summary Cards):**
-    1. *Total Tiket:* Akumulasi seluruh tiket yang terdaftar.
-    2. *Tiket Aktif:* Jumlah tiket dengan status `Pending` dan `Diproses`.
-    3. *Tiket Selesai:* Jumlah tiket dengan status `Selesai`.
-  * **Tabel Riwayat Aduan:** Menampilkan kolom Nomor Tiket, Nama Pelapor, Kategori, Cuplikan Deskripsi, Status (dengan badge warna), dan Tombol Aksi.
-* **Fitur Update (Ubah Status & Detail Tiket):**
-  * Petugas dapat memilih tiket untuk mode edit.
-  * Form beralih ke mode update (tombol "Simpan Perubahan" dan "Batal").
-  * Petugas dapat mengubah status penanganan (`Pending`, `Diproses`, `Selesai`) serta memperbarui keterangan pendukung.
-* **Fitur Delete (Hapus Tiket):**
-  * Petugas dapat menghapus tiket yang tidak valid atau duplikat.
-  * Dilengkapi dialog konfirmasi modal/pop-up: *"Apakah Anda yakin ingin menghapus tiket [nomor_tiket]?"* untuk mencegah *accidental deletion*.
-* **Fitur Search & Filter Interaktif:**
-  * **Search Bar:** Pencarian instan *real-time* berdasarkan kata kunci pada `nomor_tiket`, `nama_pelapor`, atau `deskripsi`.
-  * **Filter Dropdown:** Memfilter tabel data berdasarkan `status` (`Semua`, `Pending`, `Diproses`, `Selesai`) dan filter berdasarkan `kategori`.
+#### B. Kelengkapan Siklus Fungsional (CRUD & Interaktivitas)
+1. **Create (Pengajuan Tiket Baru):**
+   - Form input interaktif untuk: `nomor_tiket` (dibuat otomatis oleh sistem atau dapat diisi manual jika dibutuhkan), `nama_pelapor`, `kategori` (dropdown opsi: *Fasilitas & Sarana, Akademik, Layanan Administrasi, Finansial, Teknologi & Informasi, Lainnya*), `deskripsi` (textarea lengkap), dan `status` default `Pending`.
+   - Validasi ketat sisi klien sebelum pengiriman data.
+2. **Read (Dashboard & Visualisasi Data):**
+   - **Kartu Ringkasan (KPI Cards):**
+     * *Total Seluruh Tiket:* Akumulasi seluruh aduan yang masuk.
+     * *Tiket Pending / Menunggu:* Aduan yang belum ditangani (status `Pending`).
+     * *Tiket Diproses / Selesai:* Rincian aduan aktif yang sedang ditindaklanjuti (`Diproses`) dan yang telah tuntas (`Selesai`).
+   - **Tabel Riwayat Pengaduan:** Menampilkan seluruh data tiket secara tabular dengan kolom: Nomor Tiket, Nama Pelapor, Kategori, Ringkasan Deskripsi, Badge Status, Tanggal/Waktu, dan Kolom Aksi.
+3. **Update (Perubahan Status & Data Tiket):**
+   - Mode edit cepat untuk memperbarui status penanganan tiket (`Pending` $\rightarrow$ `Diproses` $\rightarrow$ `Selesai`) atau memperbarui rincian aduan.
+   - Tombol *Batal Edit* untuk mengembalikan form ke status tambah baru.
+4. **Delete (Penghapusan Tiket):**
+   - Fitur penghapusan baris tiket yang dilengkapi dialog konfirmasi (*confirmation modal/alert*) untuk mencegah kehilangan data akibat klik tidak sengaja.
+5. **Search & Filter (Pencarian & Penyaringan Interaktif):**
+   - *Instant Search Bar:* Pencarian *real-time* berbasis nomor tiket, nama pelapor, atau kata kunci deskripsi.
+   - *Filter Kategori:* Dropdown untuk menyaring tiket berdasarkan rumpun masalah.
+   - *Filter Status:* Tab atau dropdown untuk memfilter tiket berdasarkan status (`Semua`, `Pending`, `Diproses`, `Selesai`).
 
 ---
 
-## 3. Spesifikasi Skema Data (Supabase PostgreSQL)
+### 3. Spesifikasi Skema Data (Supabase PostgreSQL)
 
-Nama tabel dan kolom mengacu 100% pada **Modul 2 SKPL**:
-* **Nama Tabel:** `tickets`
+Nama tabel dan kolom mengacu 100% sama persis dengan Modul 2 SKPL:
 
-| Nama Kolom | Tipe Data PostgreSQL | Constraint / Aturan Validasi | Keterangan Fungsional |
+#### Tabel: `public.tickets`
+
+| Nama Kolom | Tipe Data PostgreSQL | Aturan Validasi / Constraint | Keterangan |
 | :--- | :--- | :--- | :--- |
-| `id` | `BIGINT GENERATED ALWAYS AS IDENTITY` | `PRIMARY KEY` | Kunci unik pengenal baris data. |
-| `nomor_tiket` | `VARCHAR(30)` | `NOT NULL, UNIQUE, CHECK (length(trim(nomor_tiket)) > 0)` | Nomor unik identifikasi tiket aduan (contoh: `TKT-20261115-001`). |
-| `nama_pelapor`| `VARCHAR(100)` | `NOT NULL, CHECK (length(trim(nama_pelapor)) > 0)` | Nama lengkap pengguna/pelapor. |
-| `kategori` | `VARCHAR(50)` | `NOT NULL, CHECK (length(trim(kategori)) > 0)` | Kategori pengaduan (contoh: Layanan, Teknis, Fasilitas). |
-| `deskripsi` | `TEXT` | `NOT NULL, CHECK (length(trim(deskripsi)) > 0)` | Uraian masalah/aspirasi (Wajib diisi; dasar verifikasi TC-01). |
-| `status` | `VARCHAR(20)` | `NOT NULL, DEFAULT 'Pending', CHECK (status IN ('Pending', 'Diproses', 'Selesai'))` | Status penanganan aduan (dasar verifikasi TC-02). |
-| `created_at` | `TIMESTAMPTZ` | `NOT NULL, DEFAULT timezone('utc'::text, now())` | Catatan waktu pelaporan otomatis. |
+| `id` | `BIGINT GENERATED ALWAYS AS IDENTITY` | `PRIMARY KEY` | ID unik penanda baris data (Auto Increment). |
+| `nomor_tiket` | `VARCHAR(30)` | `NOT NULL`, `UNIQUE` | Kode tiket unik pengaduan (contoh: `TKT-20261115-001`). |
+| `nama_pelapor` | `VARCHAR(100)` | `NOT NULL`, `CHECK (trim(nama_pelapor) <> '')` | Nama lengkap pengguna/mahasiswa yang menyampaikan laporan. |
+| `kategori` | `VARCHAR(50)` | `NOT NULL`, `CHECK (trim(kategori) <> '')` | Klasifikasi masalah/aduan. |
+| `deskripsi` | `TEXT` | `NOT NULL`, `CHECK (trim(deskripsi) <> '')` | Rincian lengkap kendala yang dilaporkan. |
+| `status` | `VARCHAR(20)` | `NOT NULL`, `DEFAULT 'Pending'`, `CHECK (status IN ('Pending', 'Diproses', 'Selesai'))` | Status tahapan penanganan tiket aduan. |
+| `created_at` | `TIMESTAMPTZ` | `NOT NULL`, `DEFAULT timezone('utc'::text, now())` | Catatan waktu pembuatan tiket secara otomatis. |
 
 ---
 
-## 4. Kontrak Pengujian Black Box & Keamanan (Acuan Mutlak QA)
+### 4. Kontrak Pengujian Black Box & Keamanan (Acuan Mutlak QA)
 
-| ID Uji | Tipe Pengujian | Skenario Pengujian | Input Data / Kondisi | Hasil yang Diharapkan (Expected Result) | Standar Toleransi |
+Tabel berikut menjadi tolok ukur pengujian penerimaan sistem:
+
+| ID Test | Kategori | Skenario Pengujian | Input Data | Hasil yang Diharapkan | Status Kelulusan |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **TC-01** | Fungsional (Validasi) | Submit Laporan Kosong | Form diisi, namun `deskripsi` dikosongkan: `[Kosong]` / spasi saja. | Sistem menolak simpan, form tidak ter-submit ke Supabase, dan menampilkan pesan alert merah: **"Deskripsi wajib diisi"**. | Mutlak (Zero Tolerance) |
-| **TC-02** | Fungsional (Update) | Update Status Tiket | Ubah status tiket dari `Pending` ke `Diproses`. | Status tiket terbarui pada database dan langsung tercermin pada dashboard/tabel utama secara akurat. | Mutlak |
-| **SEC-01**| Keamanan (Anti-XSS) | Injeksi Skrip Berbahaya | Field `nama_pelapor` atau `deskripsi` diisi payload: `<img src=x onerror=alert(1)>` | Karakter HTML dieksekusi sebagai teks murni (plain text melalui `.textContent` atau sanitasi `escapeHtml`). Tidak ada dialog alert pop-up yang muncul. | Zero Vulnerability |
-| **SEC-02**| Keamanan (Kredensial)| Audit Kredensial Frontend | Inspeksi seluruh berkas frontend (`index.html`, script JS). | Hanya `SUPABASE_URL` dan `SUPABASE_ANON_KEY` yang terlihat. Variabel rahasia seperti `service_role` atau API key privat TIDAK BOLEH ada di kode client-side. | Zero Leakage |
+| **`TC-01`** | Fungsional | Submit Laporan Kosong | Deskripsi: *[Kosong / Hanya Spasi]* | Sistem menolak simpan & menampilkan pesan `"Deskripsi wajib diisi"`. Data tidak dikirim ke database. | **PASS** |
+| **`TC-02`** | Fungsional | Update Status Tiket | Ubah status tiket dari `Pending` ke `Diproses` | Status tiket terbarui pada dashboard utama secara akurat tanpa *reload* seluruh halaman (*reactive update*). | **PASS** |
+| **`SEC-01`** | Keamanan | Pengujian Anti-XSS (Cross-Site Scripting) | Nama Pelapor / Deskripsi diisi payload: `<img src=x onerror=alert(1)>` | Input dirender sebagai teks biasa murni (*plain text*). Script tidak dieksekusi di browser, tidak muncul popup alert jahat. | **PASS** |
+| **`SEC-02`** | Keamanan | Audit Kredensial Frontend | Inspeksi kode sumber file `index.html` dan `app.js` | Hanya ditemukan `SUPABASE_URL` dan `SUPABASE_ANON_KEY`. Tidak ada `SERVICE_ROLE_KEY` atau secret token apa pun. | **PASS** |
