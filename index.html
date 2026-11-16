@@ -697,19 +697,74 @@
            ========================================================================= -->
       <section id="view-page2" class="page-view hidden p-6 sm:p-8 max-w-4xl mx-auto w-full space-y-6">
 
-        <!-- Top Header Success Indicator -->
-        <div class="text-center pt-2 pb-4 space-y-1.5">
-          <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center mb-3 shadow-xs">
+        <!-- Top Header Success Indicator (Dinamis: Berhasil Dikirim / Status Aspirasi) -->
+        <div id="page2HeaderBox" class="text-center pt-2 pb-2 space-y-1.5">
+          <div id="page2HeaderIcon" class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center mb-3 shadow-xs">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
             </svg>
           </div>
-          <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Aspirasi Berhasil Dikirim</h2>
-          <p class="text-xs text-slate-500">Laporan Anda telah berhasil dicatat dalam antrean penanganan sistem.</p>
+          <h2 id="page2HeaderTitle" class="text-2xl font-extrabold text-slate-900 tracking-tight">Aspirasi Berhasil Dikirim</h2>
+          <p id="page2HeaderSubtitle" class="text-xs text-slate-500">Laporan Anda telah berhasil dicatat dalam antrean penanganan sistem.</p>
+        </div>
+
+        <!-- DAFTAR SELURUH TIKET ASPIRASI MAHASISWA (MULTI-TICKET SUPPORT) -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3.5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-sm font-bold text-slate-900">Daftar Tiket Aspirasi Anda</h3>
+                  <span id="page2TicketCountBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    0 Tiket
+                  </span>
+                </div>
+                <p class="text-[11px] text-slate-500">Pilih salah satu tiket di bawah untuk melihat rincian & status tanpa tertimpa.</p>
+              </div>
+            </div>
+            <div>
+              <button 
+                type="button" 
+                onclick="switchPage('page1')" 
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+              >
+                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>+ Buat Aspirasi Baru</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Container Grid Kartu Tiket (Responsif) -->
+          <div id="page2MyTicketsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <!-- Diisi secara dinamis oleh renderPage2TicketList() -->
+          </div>
+
+          <!-- Empty State jika belum ada tiket sama sekali -->
+          <div id="page2EmptyTicketsState" class="hidden text-center py-8 px-4 rounded-xl bg-slate-50/70 border border-dashed border-slate-200 space-y-3">
+            <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-800">Belum Ada Tiket yang Dikirim</p>
+              <p class="text-[11px] text-slate-500 mt-0.5">Anda belum mengajukan aspirasi apa pun. Ajukan laporan pertama Anda sekarang.</p>
+            </div>
+            <button type="button" onclick="switchPage('page1')" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1.5">
+              <span>+ Ajukan Aspirasi Baru</span>
+            </button>
+          </div>
         </div>
 
         <!-- 2 Kolom Grid Kartu Tiket & Tahapan Status -->
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+        <div id="page2DetailContainer" class="grid grid-cols-1 md:grid-cols-12 gap-5">
 
           <!-- KARTU KIRI: NOMOR TIKET RESMI -->
           <div class="md:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
@@ -1534,8 +1589,10 @@
     let supabaseClient = null;
     let isCloudMode = false;
     const LOCAL_STORAGE_KEY = 'ASPIRASI_PENPOT_TICKETS_V2';
+    const MY_TICKETS_KEY = 'ASPIRASI_MY_TICKETS_HISTORY_V1';
     let ticketsState = [];
     let currentSelectedTicket = null;
+    let isRecentSubmission = false;
 
     const initialTicketsData = [];
 
@@ -2048,6 +2105,29 @@
         updateDashboardStats();
       } else if (pageId === 'page3') {
         renderPage3Table();
+      } else if (pageId === 'page2') {
+        const headerIcon = document.getElementById('page2HeaderIcon');
+        const headerTitle = document.getElementById('page2HeaderTitle');
+        const headerSubtitle = document.getElementById('page2HeaderSubtitle');
+
+        if (isRecentSubmission) {
+          if (headerIcon) {
+            headerIcon.className = 'w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center mb-3 shadow-xs';
+            headerIcon.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>`;
+          }
+          if (headerTitle) headerTitle.textContent = 'Aspirasi Berhasil Dikirim';
+          if (headerSubtitle) headerSubtitle.textContent = 'Laporan Anda telah berhasil dicatat dalam antrean penanganan sistem.';
+          isRecentSubmission = false;
+        } else {
+          if (headerIcon) {
+            headerIcon.className = 'w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center mb-3 shadow-xs';
+            headerIcon.innerHTML = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+          }
+          if (headerTitle) headerTitle.textContent = 'Nomor Tiket & Status Aspirasi';
+          if (headerSubtitle) headerSubtitle.textContent = 'Pantau perkembangan dan tindak lanjut seluruh tiket aspirasi Anda tanpa tertimpa.';
+        }
+
+        refreshPage2View();
       }
     }
 
@@ -2159,6 +2239,12 @@
           saveLocalStorage(ticketsState);
         }
 
+        // Flag pengajuan baru agar header Page 2 menampilkan indikator sukses
+        isRecentSubmission = true;
+
+        // Simpan nomor tiket ke riwayat lokal agar dapat dilihat terus menerus
+        saveMySubmittedTicketNumber(savedTicket.nomor_tiket);
+
         // Tampilkan data pada PAGE 2
         populatePage2(savedTicket);
         updateDashboardStats();
@@ -2218,31 +2304,244 @@
     }
 
     /* =========================================================================
-       7. POPULATE PAGE 2 (NOMOR TIKET & STATUS)
+       7. MANAJEMEN TIKET MAHASISWA & POPULATE PAGE 2 (MULTI-TICKET SUPPORT)
        ========================================================================= */
+    function getMySubmittedTicketNumbers() {
+      try {
+        const raw = localStorage.getItem(MY_TICKETS_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveMySubmittedTicketNumber(ticketNum) {
+      if (!ticketNum) return;
+      try {
+        const list = getMySubmittedTicketNumbers();
+        if (!list.includes(ticketNum)) {
+          list.unshift(ticketNum);
+          localStorage.setItem(MY_TICKETS_KEY, JSON.stringify(list));
+        }
+      } catch (e) {
+        console.warn('Gagal menyimpan riwayat nomor tiket lokal:', e);
+      }
+    }
+
+    function getMyTickets() {
+      const savedNumbers = getMySubmittedTicketNumbers();
+      const currentPelaporInput = document.getElementById('nama_pelapor');
+      const activeStudentName = (currentPelaporInput ? currentPelaporInput.value.trim() : '') || 'Fadhol Afif';
+
+      const myTickets = [];
+      const addedNumbers = new Set();
+
+      // 1. Ambil tiket yang nomornya ada di daftar nomor tiket yang pernah diajukan/dilacak di browser ini
+      savedNumbers.forEach(num => {
+        const t = ticketsState.find(item => item.nomor_tiket === num);
+        if (t && !addedNumbers.has(t.nomor_tiket)) {
+          myTickets.push(t);
+          addedNumbers.add(t.nomor_tiket);
+        }
+      });
+
+      // 2. Ambil tiket yang nama pelapornya cocok dengan nama mahasiswa aktif
+      ticketsState.forEach(t => {
+        const isNameMatch = activeStudentName && t.nama_pelapor && t.nama_pelapor.toLowerCase().trim() === activeStudentName.toLowerCase().trim();
+        if (isNameMatch && !addedNumbers.has(t.nomor_tiket)) {
+          myTickets.push(t);
+          addedNumbers.add(t.nomor_tiket);
+        }
+      });
+
+      // 3. Fallback: jika belum ada tiket yang diajukan tapi ada data di ticketsState (misal saat inisialisasi awal)
+      if (myTickets.length === 0 && ticketsState.length > 0) {
+        return [...ticketsState];
+      }
+
+      return myTickets;
+    }
+
+    function renderPage2TicketList(selectedTicketNum) {
+      const container = document.getElementById('page2MyTicketsList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const myTickets = getMyTickets();
+      const countBadge = document.getElementById('page2TicketCountBadge');
+      if (countBadge) {
+        countBadge.textContent = `${myTickets.length} Tiket`;
+      }
+
+      myTickets.forEach(ticket => {
+        const isSelected = ticket.nomor_tiket === selectedTicketNum;
+
+        // Kartu Tiket
+        const card = document.createElement('div');
+        card.className = isSelected
+          ? 'relative p-4 rounded-2xl border-2 border-indigo-500 bg-indigo-50/40 shadow-xs flex flex-col justify-between space-y-3 cursor-pointer transition-all'
+          : 'relative p-4 rounded-2xl border border-slate-200 bg-white hover:border-indigo-300 hover:bg-slate-50/60 shadow-2xs flex flex-col justify-between space-y-3 cursor-pointer transition-all group';
+
+        // Klik kartu untuk memilih tiket dan melihat detailnya
+        card.addEventListener('click', () => {
+          populatePage2(ticket);
+          // Scroll halus ke detail jika pada perangkat layar kecil / mobile
+          if (window.innerWidth < 768) {
+            const detailEl = document.getElementById('page2DetailContainer');
+            if (detailEl) detailEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+
+        // Baris Atas: Nomor Tiket & Status Badge
+        const topRow = document.createElement('div');
+        topRow.className = 'flex items-center justify-between gap-2';
+
+        const nomorEl = document.createElement('span');
+        nomorEl.className = isSelected 
+          ? 'font-mono font-extrabold text-xs text-indigo-700 tracking-tight' 
+          : 'font-mono font-bold text-xs text-slate-800 tracking-tight group-hover:text-indigo-600';
+        nomorEl.textContent = ticket.nomor_tiket;
+
+        const statusBadge = document.createElement('span');
+        const st = ticket.status || 'Pending';
+        if (st === 'Pending') {
+          statusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200';
+          statusBadge.textContent = 'Pending';
+        } else if (st === 'Diproses') {
+          statusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200';
+          statusBadge.textContent = 'Diproses';
+        } else {
+          statusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+          statusBadge.textContent = 'Selesai';
+        }
+
+        topRow.appendChild(nomorEl);
+        topRow.appendChild(statusBadge);
+        card.appendChild(topRow);
+
+        // Bagian Tengah: Kategori & Ringkasan Deskripsi
+        const middleDiv = document.createElement('div');
+        middleDiv.className = 'space-y-1.5';
+
+        const katBadge = document.createElement('span');
+        katBadge.className = 'inline-block text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60';
+        katBadge.textContent = ticket.kategori;
+
+        const descEl = document.createElement('p');
+        descEl.className = 'text-xs text-slate-600 line-clamp-2 leading-relaxed break-words font-normal';
+        descEl.textContent = ticket.deskripsi;
+
+        middleDiv.appendChild(katBadge);
+        middleDiv.appendChild(descEl);
+        card.appendChild(middleDiv);
+
+        // Baris Bawah: Tanggal Pembuatan & Indikator Pilihan
+        const bottomRow = document.createElement('div');
+        bottomRow.className = 'flex items-center justify-between text-[11px] pt-2 border-t border-slate-100';
+
+        const dateEl = document.createElement('span');
+        dateEl.className = 'text-[10px] font-mono text-slate-400';
+        const dateObj = new Date(ticket.created_at || Date.now());
+        dateEl.textContent = dateObj.toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'short'
+        });
+
+        const actionIndicator = document.createElement('span');
+        if (isSelected) {
+          actionIndicator.className = 'text-[10px] font-bold text-indigo-700 flex items-center gap-1';
+          actionIndicator.innerHTML = '<span>Sedang Dilihat</span><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>';
+        } else {
+          actionIndicator.className = 'text-[10px] font-medium text-slate-400 group-hover:text-indigo-600 flex items-center gap-0.5';
+          actionIndicator.innerHTML = '<span>Buka Detail</span><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>';
+        }
+
+        bottomRow.appendChild(dateEl);
+        bottomRow.appendChild(actionIndicator);
+        card.appendChild(bottomRow);
+
+        container.appendChild(card);
+      });
+    }
+
     function populatePage2(ticket) {
+      if (!ticket) return;
       currentSelectedTicket = ticket;
 
+      // Simpan nomor tiket ke riwayat lokal agar selalu ada di daftar tiket mahasiswa
+      saveMySubmittedTicketNumber(ticket.nomor_tiket);
+
+      // Render ulang daftar kartu tiket dengan tiket ini dalam status terpilih (highlighted)
+      renderPage2TicketList(ticket.nomor_tiket);
+
+      // Pastikan container detail tampil & empty state tersembunyi
+      const detailContainer = document.getElementById('page2DetailContainer');
+      const emptyState = document.getElementById('page2EmptyTicketsState');
+      if (detailContainer) detailContainer.classList.remove('hidden');
+      if (emptyState) emptyState.classList.add('hidden');
+
       // Nomor tiket
-      document.getElementById('displayTicketNumber').textContent = ticket.nomor_tiket;
+      const elNum = document.getElementById('displayTicketNumber');
+      if (elNum) elNum.textContent = ticket.nomor_tiket;
 
       // Pelapor, kategori, deskripsi (MUTLAK ANTI-XSS DENGAN .textContent)
-      document.getElementById('displayNamaPelapor').textContent = ticket.nama_pelapor;
-      document.getElementById('displayKategori').textContent = ticket.kategori;
-      document.getElementById('displayDeskripsi').textContent = ticket.deskripsi;
+      const elNama = document.getElementById('displayNamaPelapor');
+      if (elNama) elNama.textContent = ticket.nama_pelapor;
+
+      const elKat = document.getElementById('displayKategori');
+      if (elKat) elKat.textContent = ticket.kategori;
+
+      const elDesk = document.getElementById('displayDeskripsi');
+      if (elDesk) elDesk.textContent = ticket.deskripsi;
 
       // Format Waktu
       const dateObj = new Date(ticket.created_at || Date.now());
-      document.getElementById('displayCreatedDate').textContent = dateObj.toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      const elDate = document.getElementById('displayCreatedDate');
+      if (elDate) {
+        elDate.textContent = dateObj.toLocaleDateString('id-ID', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      }
 
-      // Update Stepper
+      // Update Stepper Progres Penanganan
       updateStepperDisplay(ticket.status);
+    }
+
+    function refreshPage2View() {
+      const myTickets = getMyTickets();
+      const countBadge = document.getElementById('page2TicketCountBadge');
+      if (countBadge) {
+        countBadge.textContent = `${myTickets.length} Tiket`;
+      }
+
+      const detailContainer = document.getElementById('page2DetailContainer');
+      const emptyState = document.getElementById('page2EmptyTicketsState');
+
+      if (myTickets.length === 0) {
+        if (detailContainer) detailContainer.classList.add('hidden');
+        if (emptyState) emptyState.classList.remove('hidden');
+        const listEl = document.getElementById('page2MyTicketsList');
+        if (listEl) listEl.innerHTML = '';
+        return;
+      }
+
+      if (emptyState) emptyState.classList.add('hidden');
+      if (detailContainer) detailContainer.classList.remove('hidden');
+
+      // Cari tiket aktif yang sedang terpilih
+      let activeTicket = null;
+      if (currentSelectedTicket) {
+        activeTicket = myTickets.find(t => t.nomor_tiket === currentSelectedTicket.nomor_tiket);
+      }
+      if (!activeTicket) {
+        activeTicket = myTickets[0];
+      }
+
+      populatePage2(activeTicket);
     }
 
     function updateStepperDisplay(status) {
@@ -2586,6 +2885,7 @@
       if (confirm('Apakah Anda yakin ingin mengosongkan seluruh data aspirasi menjadi 0?')) {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
         localStorage.removeItem('ASPIRASI_PENPOT_TICKETS_V1');
+        localStorage.removeItem(MY_TICKETS_KEY);
         ticketsState = [];
         saveLocalStorage(ticketsState);
 
@@ -2601,6 +2901,9 @@
         updateDashboardStats();
         if (document.getElementById('view-page3') && !document.getElementById('view-page3').classList.contains('hidden')) {
           renderPage3Table();
+        }
+        if (document.getElementById('view-page2') && !document.getElementById('view-page2').classList.contains('hidden')) {
+          refreshPage2View();
         }
         showToast('Seluruh data aspirasi berhasil direset menjadi 0!');
       }
