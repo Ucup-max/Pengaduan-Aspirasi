@@ -298,10 +298,7 @@ async function initSystem() {
   // Generate Ticket ID awal
   generateNewTicketId();
 
-  // Inisialisasi Status RBAC (Role-Based Access Control)
-  applyRBAC();
-
-  // Listeners
+  // Inisialisasi Listeners Formulir Aspirasi
   const form = document.getElementById('aspirationForm');
   if (form) {
     form.addEventListener('submit', handleAspirationSubmit);
@@ -336,11 +333,26 @@ async function initSystem() {
     });
   }
 
-  // Hitung metrik ringkasan awal dashboard
-  updateDashboardStats();
+  // ================= GERBANG AUTENTIKASI (LOGIN GATE) =================
+  const user = getCurrentUser();
+  const loginView = document.getElementById('view-login');
+  const appLayout = document.getElementById('appLayoutWrapper');
 
-  // Default buka Halaman Beranda (Home / Dashboard)
-  switchPage('home');
+  if (!user) {
+    // Pengguna belum login: Tampilkan gerbang login, sembunyikan layout dashboard
+    if (loginView) loginView.classList.remove('hidden');
+    if (appLayout) appLayout.classList.add('hidden');
+  } else {
+    // Pengguna sudah login: Sembunyikan login, tampilkan layout dashboard
+    if (loginView) loginView.classList.add('hidden');
+    if (appLayout) appLayout.classList.remove('hidden');
+
+    currentRole = user.role || 'mahasiswa';
+    applyUserProfile(user);
+    applyRBAC();
+    updateDashboardStats();
+    switchPage('home');
+  }
 }
 
 // Bootstrap saat DOM siap

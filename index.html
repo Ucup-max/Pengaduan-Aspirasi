@@ -24,8 +24,237 @@
 </head>
 <body class="bg-[#f8fafc] text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
-  <!-- ================= LAYOUT WRAPPER ================= -->
-  <div class="flex-1 flex flex-col md:flex-row min-h-screen w-full">
+  <!-- ================= LOGIN SCREEN GATE (SPLIT SCREEN PERSIS DESAIN REFERENCE) ================= -->
+  <div id="view-login" class="min-h-screen w-full flex flex-col lg:flex-row bg-[#081120] text-slate-800">
+    
+    <!-- LEFT PANEL: HERO BRANDING & SCHEMA VISUAL (PERSIS FOTO REFERENCE KIRI) -->
+    <div class="lg:w-1/2 p-8 lg:p-14 bg-gradient-to-br from-[#0c182c] via-[#091222] to-[#040913] text-white flex flex-col justify-between relative overflow-hidden border-b lg:border-b-0 lg:border-r border-slate-800/80">
+      
+      <!-- Subtle background grid effect -->
+      <div class="absolute inset-0 bg-[radial-gradient(#1e3a8a_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none"></div>
+
+      <!-- Top Badge / Header -->
+      <div class="relative z-10 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-md shadow-blue-500/20">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="text-[11px] font-bold tracking-widest text-blue-400 uppercase">TEKNIK INFORMATIKA • BASIS DATA</div>
+            <div class="text-xs text-slate-400 font-medium">Sistem Informasi Pengaduan & Aspirasi Mahasiswa</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Hero Headline & Tagline -->
+      <div class="relative z-10 my-8 lg:my-0 space-y-6">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+          Praktik nyata.<br>
+          Penilaian<br>
+          berdasarkan bukti.
+        </h1>
+        <p class="text-slate-300/80 text-sm sm:text-base max-w-lg leading-relaxed">
+          Ruang portal layanan aspirasi sivitas kampus untuk menguji logika pengaduan, integritas basis data, serta transparansi penanganan laporan.
+        </p>
+
+        <!-- Decorative Interactive Schema Cards (Persis Visual Reference) -->
+        <div class="pt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
+          <!-- Card 1: mahasiswa -->
+          <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/60 font-mono text-xs backdrop-blur-xs space-y-1.5 shadow-sm">
+            <div class="flex items-center justify-between text-blue-400 font-semibold border-b border-slate-800 pb-1">
+              <span>mahasiswa</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 border border-blue-800">TABLE</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-300 text-[11px]">
+              <span>nim</span>
+              <span class="text-[9px] text-amber-400 uppercase font-bold">PRIMARY KEY</span>
+            </div>
+            <div class="text-slate-400 text-[11px]">nama</div>
+            <div class="text-slate-400 text-[11px]">kelas</div>
+          </div>
+
+          <!-- Card 2: aspirasi -->
+          <div class="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/60 font-mono text-xs backdrop-blur-xs space-y-1.5 shadow-sm">
+            <div class="flex items-center justify-between text-emerald-400 font-semibold border-b border-slate-800 pb-1">
+              <span>aspirasi</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">TABLE</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-300 text-[11px]">
+              <span>id_tiket</span>
+              <span class="text-[9px] text-amber-400 uppercase font-bold">PRIMARY KEY</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-400 text-[11px]">
+              <span>nim</span>
+              <span class="text-[9px] text-sky-400">→ mahasiswa</span>
+            </div>
+            <div class="text-slate-400 text-[11px]">status</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom footer notice -->
+      <div class="relative z-10 text-xs text-slate-500 flex items-center justify-between pt-4 border-t border-slate-800/60">
+        <span>© 2026 Portal Aspirasi Mahasiswa v2.1</span>
+        <span>Terproteksi RBAC & Pangkalan Data</span>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: CLEAN LOGIN FORM (PERSIS FOTO REFERENCE KANAN) -->
+    <div class="lg:w-1/2 p-6 sm:p-12 lg:p-16 bg-white flex flex-col justify-center items-center">
+      <div class="w-full max-w-md space-y-6">
+
+        <!-- Header Titles -->
+        <div class="space-y-1.5">
+          <div class="text-[11px] font-bold tracking-widest text-slate-400 uppercase">UTS PRAKTIKUM • TM1–TM7</div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Masuk ke ruang ujian</h2>
+          <p class="text-xs sm:text-sm text-slate-500">Gunakan akun yang telah didaftarkan dosen / pangkalan data kampus.</p>
+        </div>
+
+        <!-- Role Tabs Switcher: [ 🎓 Mahasiswa ] [ 📖 Dosen ] -->
+        <div class="p-1 rounded-xl bg-slate-100 border border-slate-200 flex gap-1">
+          <button 
+            type="button" 
+            id="tabLoginMahasiswa" 
+            onclick="setLoginRoleTab('mahasiswa')" 
+            class="flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-all bg-white text-slate-900 shadow-xs cursor-pointer font-bold text-xs"
+          >
+            <span>🎓</span>
+            <span>Mahasiswa</span>
+          </button>
+          <button 
+            type="button" 
+            id="tabLoginDosen" 
+            onclick="setLoginRoleTab('dosen')" 
+            class="flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-all text-slate-500 hover:text-slate-800 cursor-pointer font-medium text-xs"
+          >
+            <span>📖</span>
+            <span>Dosen</span>
+          </button>
+        </div>
+
+        <!-- Error Notification Alert Box -->
+        <div id="loginErrorBox" class="hidden p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-start gap-2.5 animate-in fade-in duration-200">
+          <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div class="text-xs">
+            <span class="font-bold">Gagal Masuk:</span>
+            <span id="loginErrorMessage" class="ml-1">Kredensial tidak valid.</span>
+          </div>
+        </div>
+
+        <!-- Login Form -->
+        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <!-- Input Username / NIM -->
+          <div class="space-y-1.5">
+            <label id="loginUsernameLabel" for="loginUsername" class="block text-xs font-semibold text-slate-700">
+              Nomor Induk Mahasiswa
+            </label>
+            <input 
+              type="text" 
+              id="loginUsername" 
+              required
+              autocomplete="username"
+              placeholder="Contoh: 260102037 atau 260302026" 
+              class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder:text-slate-400 bg-slate-50/50 hover:bg-white"
+            />
+          </div>
+
+          <!-- Input Kata Sandi -->
+          <div class="space-y-1.5">
+            <label for="loginPassword" class="block text-xs font-semibold text-slate-700">
+              Kata sandi
+            </label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="loginPassword" 
+                required
+                autocomplete="current-password"
+                placeholder="Masukkan kata sandi..." 
+                class="w-full pl-3.5 pr-10 py-2.5 text-xs rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder:text-slate-400 bg-slate-50/50 hover:bg-white"
+              />
+              <button 
+                type="button" 
+                onclick="toggleShowLoginPassword()" 
+                class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                title="Tampilkan / Sembunyikan sandi"
+              >
+                <svg id="loginEyeIcon" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Submit Button: Blue (Persis Reference: "Masuk →") -->
+          <button 
+            type="submit" 
+            id="btnLoginSubmit" 
+            class="w-full py-3 px-4 rounded-xl bg-[#1d4ed8] hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span id="btnLoginText">Masuk →</span>
+            <svg id="loginSpinner" class="hidden animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+          </button>
+        </form>
+
+        <!-- Informative Note Below Button (Persis Checkmark Reference) -->
+        <div class="flex items-start gap-2 text-slate-400 text-xs pt-1">
+          <svg class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="leading-relaxed">
+            Kelas mengikuti data akun Anda.<br>
+            Hubungi dosen jika identitas atau kelas perlu diperbaiki.
+          </p>
+        </div>
+
+        <!-- Quick Demo Account Chips (Memudahkan Penguji / Dosen / Mahasiswa Langsung Klik) -->
+        <div class="pt-4 border-t border-slate-100 space-y-2">
+          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Akses Uji Coba Cepat:</div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <button 
+              type="button" 
+              onclick="fillDemoAccount('260102037')" 
+              class="px-2.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-left transition-all cursor-pointer"
+            >
+              <div class="text-[10px] font-bold text-amber-700">📖 Dosen</div>
+              <div class="text-[11px] font-extrabold truncate">Yusuf Anggit</div>
+              <div class="text-[9px] text-amber-600 font-mono">260102037</div>
+            </button>
+            <button 
+              type="button" 
+              onclick="fillDemoAccount('260302026')" 
+              class="px-2.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-left transition-all cursor-pointer"
+            >
+              <div class="text-[10px] font-bold text-blue-700">🎓 Mahasiswa</div>
+              <div class="text-[11px] font-extrabold truncate">Fadhol Afif</div>
+              <div class="text-[9px] text-blue-600 font-mono">260302026</div>
+            </button>
+            <button 
+              type="button" 
+              onclick="fillDemoAccount('admin')" 
+              class="px-2.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-left transition-all cursor-pointer"
+            >
+              <div class="text-[10px] font-bold text-emerald-700">🛡️ Admin</div>
+              <div class="text-[11px] font-extrabold truncate">Help Desk</div>
+              <div class="text-[9px] text-emerald-600 font-mono">admin</div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LAYOUT WRAPPER (DASHBOARD & PAGES) ================= -->
+  <div id="appLayoutWrapper" class="flex-1 flex flex-col md:flex-row min-h-screen w-full hidden">
 
     <!-- ================= SIDEBAR NAVIGASI (PERSIS DESAIN PENPOT) ================= -->
     <aside class="w-full md:w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 shadow-xs z-20">
@@ -150,6 +379,7 @@
             class="w-full pl-2.5 pr-8 py-1.5 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-800 shadow-2xs focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
           >
             <option value="mahasiswa">🎓 Mahasiswa (Pelapor)</option>
+            <option value="dosen">📖 Dosen (Tenaga Pengajar)</option>
             <option value="admin">🛡️ Admin (Petugas Help Desk)</option>
           </select>
         </div>
@@ -169,6 +399,19 @@
           <span onclick="openContactModal()" class="hover:text-slate-600 cursor-pointer">Bantuan & Kontak</span>
           <span onclick="toggleRoleQA()" class="hover:text-indigo-600 cursor-pointer text-indigo-600 font-semibold" title="Klik untuk beralih peran">Ganti Role ⇄</span>
         </div>
+
+        <!-- Logout Button -->
+        <button 
+          type="button" 
+          onclick="logoutUser()" 
+          class="w-full mt-1.5 py-1.5 px-3 rounded-xl bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-700 text-xs font-bold border border-slate-200 hover:border-rose-200 transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+          title="Keluar dari sesi akun saat ini"
+        >
+          <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+          <span>Keluar (Logout)</span>
+        </button>
       </div>
     </aside>
 
@@ -206,6 +449,16 @@
             </button>
             <button 
               type="button" 
+              id="toggleHeaderDosen" 
+              onclick="handleRoleSwitch('dosen')" 
+              class="hidden px-2.5 py-1 rounded-lg text-xs font-bold transition-all items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900"
+              title="Peran Dosen"
+            >
+              <span>📖</span>
+              <span>Dosen</span>
+            </button>
+            <button 
+              type="button" 
               id="toggleHeaderAdmin" 
               onclick="handleRoleSwitch('admin')" 
               class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900"
@@ -236,6 +489,19 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
             </svg>
+          </button>
+
+          <!-- Logout Button -->
+          <button 
+            type="button" 
+            onclick="logoutUser()" 
+            title="Keluar dari akun (Logout)" 
+            class="px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-rose-300 bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-700 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+          >
+            <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            <span class="hidden sm:inline">Keluar</span>
           </button>
         </div>
       </header>
