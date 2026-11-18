@@ -294,30 +294,10 @@
         </nav>
       </div>
 
-      <!-- Bottom User & RBAC Role Switcher Box -->
+      <!-- Bottom User Profile Card Box -->
       <div class="p-3.5 border-t border-slate-200/80 bg-slate-50/70 space-y-2.5">
-        <!-- RBAC Switcher Header -->
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] uppercase font-extrabold text-slate-400 tracking-wider">Mode Peran (RBAC)</span>
-          <span id="roleBadgeIndicator" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-            Mahasiswa
-          </span>
-        </div>
-
-        <!-- Role Selector Dropdown -->
-        <div class="relative">
-          <select 
-            id="roleSelector" 
-            onchange="handleRoleSwitch(this.value)" 
-            class="w-full pl-2.5 pr-8 py-1.5 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-800 shadow-2xs focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all cursor-pointer"
-          >
-            <option value="mahasiswa">🎓 Mahasiswa (Pelapor)</option>
-            <option value="dosen">📖 Dosen (Akses Penuh)</option>
-          </select>
-        </div>
-
         <!-- User Profile Card -->
-        <div class="flex items-center gap-2.5 pt-1">
+        <div class="flex items-center gap-2.5">
           <div id="userAvatar" class="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs shrink-0">
             M
           </div>
@@ -329,7 +309,10 @@
 
         <div class="pt-1.5 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-slate-400">
           <span onclick="openContactModal()" class="hover:text-slate-600 cursor-pointer">Bantuan & Kontak</span>
-          <span onclick="toggleRoleQA()" class="hover:text-indigo-600 cursor-pointer text-indigo-600 font-semibold" title="Klik untuk beralih peran">Ganti Role ⇄</span>
+          <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Online</span>
+          </span>
         </div>
 
         <!-- Logout Button -->
@@ -365,30 +348,6 @@
               onkeydown="if(event.key === 'Enter') { event.preventDefault(); handleGlobalSearch(); }"
               class="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none transition-all placeholder:text-slate-400"
             />
-          </div>
-
-          <!-- Quick Role Switcher Buttons (2 Role Eksklusif: Mahasiswa & Dosen) -->
-          <div class="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 self-start sm:self-auto shrink-0">
-            <button 
-              type="button" 
-              id="toggleHeaderMahasiswa" 
-              onclick="handleRoleSwitch('mahasiswa')" 
-              class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs bg-indigo-600 text-white"
-              title="Beralih ke peran Mahasiswa (Pelapor)"
-            >
-              <span>🎓</span>
-              <span>Mahasiswa</span>
-            </button>
-            <button 
-              type="button" 
-              id="toggleHeaderDosen" 
-              onclick="handleRoleSwitch('dosen')" 
-              class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-slate-600 hover:text-slate-900"
-              title="Beralih ke peran Dosen (Akses Penuh)"
-            >
-              <span>📖</span>
-              <span>Dosen</span>
-            </button>
           </div>
         </div>
 
@@ -427,22 +386,6 @@
           </button>
         </div>
       </header>
-
-      <!-- NOTIFIKASI BANNER MODE DOSEN (AKSES PENUH) AKTIF -->
-      <div id="adminModeBanner" class="hidden bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs animate-in slide-in-from-top duration-200">
-        <div class="flex items-center gap-2.5 font-medium">
-          <span class="px-2 py-0.5 rounded bg-amber-900/90 font-bold text-[10px] tracking-wide uppercase shrink-0">Dosen Aktif</span>
-          <span>Anda login sebagai <strong>Dosen (Akses Penuh)</strong>. Semua fitur terbuka: mengelola <strong>Antrean Aspirasi</strong>, memperbarui status tiket, dan membuka panel pengujian.</span>
-        </div>
-        <div class="flex items-center gap-2 shrink-0">
-          <button type="button" onclick="switchPage('page3')" class="px-3 py-1 rounded-lg bg-white text-amber-900 font-bold hover:bg-amber-50 transition-colors text-xs shadow-xs cursor-pointer">
-            Kelola Antrean Aspirasi →
-          </button>
-          <button type="button" onclick="handleRoleSwitch('mahasiswa')" class="px-3 py-1 rounded-lg bg-amber-800/90 hover:bg-amber-900 text-white font-medium transition-colors text-xs cursor-pointer">
-            Beralih ke Mahasiswa
-          </button>
-        </div>
-      </div>
 
       <!-- =========================================================================
            BERANDA / DASHBOARD UTAMA (PORTAL ASPIRASI MAHASISWA)
