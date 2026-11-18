@@ -87,6 +87,7 @@ function logoutUser() {
   const errBox = document.getElementById('loginErrorBox');
   if (errBox) errBox.classList.add('hidden');
 
+  window.location.hash = '#/login';
   showToast('Anda telah berhasil keluar dari akun.');
 }
 
@@ -164,6 +165,69 @@ function fillDemoAccount(identifier) {
   if (errBox) errBox.classList.add('hidden');
 
   showToast(`Akun ${user.nama} (${user.role.toUpperCase()}) telah diisikan!`);
+}
+
+function loginDemoUser(roleType) {
+  const isDosen = roleType === 'dosen';
+  const targetUser = isDosen
+    ? USER_ACCOUNTS.find(u => u.role === 'dosen')
+    : USER_ACCOUNTS.find(u => u.nim === '260302026') || USER_ACCOUNTS.find(u => u.role === 'mahasiswa');
+
+  if (!targetUser) return;
+
+  setLoginRoleTab(isDosen ? 'dosen' : 'mahasiswa');
+
+  const userInput = document.getElementById('loginUsername');
+  const passInput = document.getElementById('loginPassword');
+  if (userInput) userInput.value = targetUser.nim || targetUser.username;
+  if (passInput) passInput.value = targetUser.password;
+
+  const btn = document.getElementById('btnLoginSubmit');
+  const btnText = document.getElementById('btnLoginText');
+  const spinner = document.getElementById('loginSpinner');
+
+  if (btn) btn.disabled = true;
+  if (spinner) spinner.classList.remove('hidden');
+  if (btnText) btnText.textContent = 'Memverifikasi Akun Demo...';
+
+  setTimeout(() => {
+    const result = loginUser(targetUser.nim, targetUser.password);
+    if (btn) btn.disabled = false;
+    if (spinner) spinner.classList.add('hidden');
+    if (btnText) btnText.textContent = 'Masuk →';
+
+    if (result.success) {
+      const user = result.user;
+      const appLayout = document.getElementById('appLayoutWrapper');
+      const loginView = document.getElementById('view-login');
+
+      if (loginView) loginView.classList.add('hidden');
+      if (appLayout) appLayout.classList.remove('hidden');
+
+      applyUserProfile(user);
+      applyRBAC();
+
+      if (user.role === 'dosen') {
+        switchPage('page3');
+      } else {
+        switchPage('home');
+      }
+      updateDashboardStats();
+
+      const roleLabel = user.role === 'dosen' ? 'Dosen / Petugas (Akses Penuh)' : 'Mahasiswa (Pelapor)';
+      showToast(`Masuk sebagai ${user.nama} [${roleLabel}].`);
+    }
+  }, 250);
+}
+
+function openLoginHelpModal() {
+  const modal = document.getElementById('loginHelpModal') || document.getElementById('contactModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeLoginHelpModal() {
+  const modal = document.getElementById('loginHelpModal') || document.getElementById('contactModal');
+  if (modal) modal.classList.add('hidden');
 }
 
 function handleLoginSubmit(e) {

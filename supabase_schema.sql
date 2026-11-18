@@ -20,6 +20,16 @@ CREATE TABLE IF NOT EXISTS public.tickets (
     CONSTRAINT chk_status_valid CHECK (status IN ('Pending', 'Diproses', 'Selesai'))
 );
 
+-- Kolom Tambahan Upgrade UX & Fungsional
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS lokasi TEXT;
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS is_anonim BOOLEAN DEFAULT false;
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS lampiran_foto TEXT;
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS catatan_penanganan TEXT;
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS riwayat JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS konfirmasi_selesai BOOLEAN DEFAULT false;
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS rating INTEGER;
+ALTER TABLE public.tickets ADD COLUMN IF NOT EXISTS feedback TEXT;
+
 -- Indeks Tambahan untuk Optimalisasi Pencarian & Filter
 CREATE INDEX IF NOT EXISTS idx_tickets_status ON public.tickets (status);
 CREATE INDEX IF NOT EXISTS idx_tickets_kategori ON public.tickets (kategori);
