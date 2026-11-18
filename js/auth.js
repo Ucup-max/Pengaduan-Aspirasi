@@ -109,7 +109,7 @@ function setLoginRoleTab(tabRole) {
     if (tabMhs) {
       tabMhs.className = 'flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-all text-slate-500 hover:text-slate-800 cursor-pointer font-medium';
     }
-    if (label) label.textContent = 'Nomor Induk Dosen / NIM Yusuf Anggit';
+    if (label) label.textContent = 'Nomor Induk Dosen';
     if (input) input.placeholder = 'Contoh: 260102037';
   } else {
     if (tabMhs) {
