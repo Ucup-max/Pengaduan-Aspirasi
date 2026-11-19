@@ -120,7 +120,7 @@ function setLoginRoleTab(tabRole) {
       tabDosen.className = 'flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-2 transition-all text-slate-500 hover:text-slate-800 cursor-pointer font-medium';
     }
     if (label) label.textContent = 'Nomor Induk Mahasiswa';
-    if (input) input.placeholder = 'Contoh: 260302026 atau 260102003';
+    if (input) input.placeholder = 'Contoh: 260302026';
   }
 }
 

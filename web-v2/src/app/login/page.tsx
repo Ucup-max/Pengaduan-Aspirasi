@@ -16,7 +16,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isDemoLoading, setIsDemoLoading] = useState<'mahasiswa' | 'dosen' | null>(null);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   // Handle Form Submit
@@ -52,38 +51,6 @@ export default function LoginPage() {
     } catch {
       setErrorMessage('Terjadi gangguan jaringan atau server. Silakan coba lagi.');
       setIsLoading(false);
-    }
-  };
-
-  // Handle 1-Click Demo Login
-  const handleDemoLogin = async (role: 'mahasiswa' | 'dosen') => {
-    setIsDemoLoading(role);
-    setErrorMessage('');
-
-    try {
-      const res = await fetch('/api/auth/demo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setErrorMessage('Gagal memproses akun demo.');
-        setIsDemoLoading(null);
-        return;
-      }
-
-      showToast(
-        `Masuk sebagai Akun Demo ${role === 'dosen' ? 'Dosen (Yusuf Anggit)' : 'Mahasiswa (Fadhol Afif)'}`,
-        'success'
-      );
-      router.push('/dashboard');
-      router.refresh();
-    } catch {
-      setErrorMessage('Gagal menghubungkan ke server demo.');
-      setIsDemoLoading(null);
     }
   };
 
@@ -243,8 +210,8 @@ export default function LoginPage() {
                 autoComplete="username"
                 placeholder={
                   activeRoleTab === 'dosen'
-                    ? 'Contoh: 260102037 (Yusuf Anggit)'
-                    : 'Contoh: 260302026 atau NIM Anda'
+                    ? 'Contoh: 260102037'
+                    : 'Contoh: 260302026'
                 }
                 className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all placeholder:text-slate-400 bg-slate-50/50 hover:bg-white"
               />
@@ -280,7 +247,7 @@ export default function LoginPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading || !!isDemoLoading}
+              disabled={isLoading}
               className="w-full py-3 px-4 rounded-xl bg-[#1d4ed8] hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {isLoading ? (
@@ -308,46 +275,6 @@ export default function LoginPage() {
                   Kendala masuk? Pusat Bantuan & Kontak Helpdesk
                 </button>
               </p>
-            </div>
-
-            {/* Quick Demo Account Helper (1-Click) */}
-            <div className="pt-3 border-t border-slate-100 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Akses Uji Coba Cepat (Akun Demo)
-                </span>
-                <span className="text-[10px] text-slate-400 font-medium">1-Klik Langsung Masuk</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleDemoLogin('mahasiswa')}
-                  disabled={isLoading || !!isDemoLoading}
-                  className="py-2.5 px-3 rounded-xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs group disabled:opacity-60"
-                  title="Masuk langsung menggunakan akun Mahasiswa"
-                >
-                  {isDemoLoading === 'mahasiswa' ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <span className="group-hover:scale-110 transition-transform">🎓</span>
-                  )}
-                  <span>Demo Mahasiswa</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDemoLogin('dosen')}
-                  disabled={isLoading || !!isDemoLoading}
-                  className="py-2.5 px-3 rounded-xl border border-amber-200 bg-amber-50/70 hover:bg-amber-100 text-amber-800 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs group disabled:opacity-60"
-                  title="Masuk langsung menggunakan akun Petugas/Dosen (Yusuf Anggit)"
-                >
-                  {isDemoLoading === 'dosen' ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <span className="group-hover:scale-110 transition-transform">📖</span>
-                  )}
-                  <span>Demo Petugas</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
