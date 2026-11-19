@@ -129,13 +129,6 @@ function RiwayatContent() {
       console.warn(e);
     }
   };
-          setSelectedTicket(updatedTicketData.ticket);
-        }
-      }
-    } catch (e) {
-      console.warn(e);
-    }
-  };
 
   return (
     <div className="flex-1 flex flex-col md:flex-row min-h-screen w-full">
