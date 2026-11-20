@@ -33,8 +33,8 @@ export async function generateTicketIdAction(): Promise<string> {
       .limit(1);
 
     if (data && data.length > 0) {
-      const lastTicket = data[0].nomor_tiket;
-      const match = lastTicket.match(/ASP-(\d+)/);
+      const lastTicket = (data[0] as any).nomor_tiket;
+      const match = typeof lastTicket === 'string' ? lastTicket.match(/ASP-(\d+)/) : null;
       if (match) {
         const nextNum = parseInt(match[1], 10) + 1;
         return `ASP-${String(nextNum).padStart(6, '0')}`;
@@ -213,17 +213,18 @@ export async function createTicketAction(payload: {
 }
 
 /**
- * 4. Pembaruan Status Tiket oleh Petugas (RBAC Server-Side: Dosen Only)
+ * 4. Pembaruan Status Tiket oleh Petugas (RBAC Server-Side: Dosen/Petugas Only)
  */
 export async function updateTicketStatusAction(payload: {
   ticketId: number | string;
   newStatus: TicketStatus;
   catatan: string;
+  buktiFoto?: string | null;
 }) {
   const user = await getServerSessionUser();
 
-  // Validasi RBAC Sisi Server (Hanya Dosen yang berhak!)
-  if (!user || user.role !== 'dosen') {
+  // Validasi RBAC Sisi Server (Hanya Dosen / Petugas yang berhak!)
+  if (!user || (user.role !== 'dosen' && (user.role as string) !== 'petugas')) {
     return {
       success: false,
       error: 'Akses ditolak: Hanya petugas / Dosen yang berhak memperbarui status aduan (HTTP 403 Forbidden).',
@@ -250,24 +251,37 @@ export async function updateTicketStatusAction(payload: {
     (t) => t.id === Number(payload.ticketId) || t.nomor_tiket === payload.ticketId
   );
 
+  // Upload bukti foto penyelesaian petugas jika ada
+  let uploadedProofUrl: string | null = null;
+  if (payload.buktiFoto) {
+    uploadedProofUrl = await uploadEvidencePhotoAction(
+      payload.buktiFoto,
+      `SOL-${currentTicket?.nomor_tiket || payload.ticketId}`
+    );
+  }
+
   const historyItem: TicketHistoryItem = {
     status: payload.newStatus,
     waktu: new Date().toISOString(),
     catatan: sanitizedCatatan,
-    petugas: user.nama || 'Dosen Penanggung Jawab',
+    petugas: user.nama || 'Petugas Helpdesk',
   };
 
   const updatedHistory = currentTicket ? [...(currentTicket.riwayat || []), historyItem] : [historyItem];
 
   try {
     const supabase = await createClient();
-    const query = supabase
-      .from('tickets')
-      .update({
-        status: payload.newStatus,
-        catatan_penanganan: sanitizedCatatan,
-        riwayat: updatedHistory as any,
-      })
+    const updatePayload: any = {
+      status: payload.newStatus,
+      catatan_penanganan: sanitizedCatatan,
+      riwayat: updatedHistory as any,
+    };
+    if (uploadedProofUrl) {
+      updatePayload.bukti_penyelesaian = uploadedProofUrl;
+    }
+
+    const query = (supabase.from('tickets') as any)
+      .update(updatePayload)
       .eq('nomor_tiket', currentTicket?.nomor_tiket || payload.ticketId);
 
     await query;
@@ -279,10 +293,14 @@ export async function updateTicketStatusAction(payload: {
     currentTicket.status = payload.newStatus;
     currentTicket.catatan_penanganan = sanitizedCatatan;
     currentTicket.riwayat = updatedHistory;
+    if (uploadedProofUrl) {
+      currentTicket.bukti_penyelesaian = uploadedProofUrl;
+    }
   }
 
   revalidatePath('/dashboard');
   revalidatePath('/aspirasi/riwayat');
+  revalidatePath('/petugas/dashboard');
   revalidatePath('/petugas/kelola');
 
   return { success: true, ticket: currentTicket };
@@ -301,8 +319,7 @@ export async function confirmTicketResolutionAction(payload: {
 
   try {
     const supabase = await createClient();
-    await supabase
-      .from('tickets')
+    await (supabase.from('tickets') as any)
       .update({
         konfirmasi_selesai: true,
         rating: payload.rating,
@@ -361,8 +378,7 @@ export async function reopenTicketAction(payload: {
 
   try {
     const supabase = await createClient();
-    await supabase
-      .from('tickets')
+    await (supabase.from('tickets') as any)
       .update({
         status: 'Diproses',
         konfirmasi_selesai: false,
@@ -453,4 +469,65 @@ export async function getFilteredTicketsAction(filter?: {
   }
 
   return { tickets: result };
+}
+
+/**
+ * 8. Mengambil Detail 1 Tiket Berdasarkan Nomor Tiket (ASP-XXXXXX)
+ */
+export async function getTicketByCodeAction(nomorTiket: string): Promise<Ticket | null> {
+  const cleanCode = nomorTiket?.trim();
+  if (!cleanCode) return null;
+
+  try {
+    const supabase = await createClient();
+    const { data, error } = await (supabase.from('tickets') as any)
+      .select('*')
+      .eq('nomor_tiket', cleanCode)
+      .single();
+
+    if (!error && data) {
+      const row = data as any;
+      const ticket: Ticket = {
+        id: row.id,
+        nomor_tiket: row.nomor_tiket,
+        nama_pelapor: row.nama_pelapor,
+        nama_asli: row.nama_pelapor,
+        is_anonim: !!row.is_anonim,
+        kategori: row.kategori,
+        lokasi: row.lokasi || 'Lingkungan Kampus',
+        deskripsi: row.deskripsi,
+        status: row.status,
+        lampiran_foto: row.lampiran_foto || null,
+        catatan_penanganan: row.catatan_penanganan || '',
+        bukti_penyelesaian: row.bukti_penyelesaian || null,
+        created_at: row.created_at,
+        riwayat: Array.isArray(row.riwayat) ? row.riwayat : [],
+        konfirmasi_selesai: !!row.konfirmasi_selesai,
+        rating: row.rating || null,
+        feedback: row.feedback || '',
+      };
+      return ticket;
+    }
+  } catch (err) {
+    console.warn('Supabase fetch single ticket fallback:', err);
+  }
+
+  // Fallback ke serverTicketCache
+  const found = serverTicketCache.find(
+    (t) => t.nomor_tiket.toLowerCase() === cleanCode.toLowerCase()
+  );
+  return found || null;
+}
+
+/**
+ * 9. Statistik Beban Kerja Tiket
+ */
+export async function getTicketStatsAction() {
+  const { tickets } = await getFilteredTicketsAction();
+  const total = tickets.length;
+  const pending = tickets.filter((t) => t.status === 'Pending').length;
+  const diproses = tickets.filter((t) => t.status === 'Diproses').length;
+  const selesai = tickets.filter((t) => t.status === 'Selesai').length;
+
+  return { total, pending, diproses, selesai };
 }

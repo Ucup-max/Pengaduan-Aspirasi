@@ -6,7 +6,7 @@ import { MapPin, Calendar } from 'lucide-react';
 interface TicketCardProps {
   ticket: Ticket;
   isSelected?: boolean;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 export function TicketCard({ ticket, isSelected, onClick }: TicketCardProps) {

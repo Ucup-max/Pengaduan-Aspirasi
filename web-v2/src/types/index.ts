@@ -1,6 +1,6 @@
 export type TicketStatus = 'Pending' | 'Diproses' | 'Selesai';
 
-export type UserRole = 'mahasiswa' | 'dosen';
+export type UserRole = 'mahasiswa' | 'dosen' | 'petugas';
 
 export interface UserAccount {
   nim: string;
@@ -31,6 +31,7 @@ export interface Ticket {
   status: TicketStatus;
   lampiran_foto?: string | null;
   catatan_penanganan?: string;
+  bukti_penyelesaian?: string | null;
   created_at: string;
   riwayat?: TicketHistoryItem[];
   konfirmasi_selesai?: boolean;

@@ -153,8 +153,7 @@ export async function PATCH(request: Request) {
     // Update Supabase Cloud if available
     try {
       const supabase = await createClient();
-      await supabase
-        .from('tickets')
+      await (supabase.from('tickets') as any)
         .update({
           status: currentTicket.status,
           catatan_penanganan: currentTicket.catatan_penanganan,

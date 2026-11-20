@@ -46,7 +46,8 @@ export default function LoginPage() {
       }
 
       showToast(`Selamat datang kembali, ${data.user.nama}!`, 'success');
-      router.push('/dashboard');
+      const targetDestination = data.redirect || (data.user.role === 'dosen' ? '/petugas/dashboard' : '/dashboard');
+      router.push(targetDestination);
       router.refresh();
     } catch {
       setErrorMessage('Terjadi gangguan jaringan atau server. Silakan coba lagi.');

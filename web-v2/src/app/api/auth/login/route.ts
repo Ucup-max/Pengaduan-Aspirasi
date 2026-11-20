@@ -16,10 +16,15 @@ export async function POST(request: Request) {
       );
     }
 
+    const redirectUrl =
+      result.user.role === 'dosen' || (result.user.role as string) === 'petugas'
+        ? '/petugas/dashboard'
+        : '/dashboard';
+
     const response = NextResponse.json({
       success: true,
       user: result.user,
-      redirect: '/dashboard',
+      redirect: redirectUrl,
     });
 
     // Set cookie sesi aman (valid 7 hari)

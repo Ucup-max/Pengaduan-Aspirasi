@@ -8,7 +8,7 @@ import { useToast } from '@/components/ui/Toast';
 import { createTicketAction } from '@/app/actions/tickets';
 
 interface TicketFormProps {
-  user: UserAccount | null;
+  user?: UserAccount | null;
   onSuccess?: (ticketNumber: string) => void;
 }
 
@@ -39,6 +39,15 @@ export function TicketForm({ user, onSuccess }: TicketFormProps) {
 
     if (user?.nama) {
       setNamaPelapor(user.nama);
+    } else {
+      fetch('/api/auth/me')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.user?.nama) {
+            setNamaPelapor(data.user.nama);
+          }
+        })
+        .catch(() => {});
     }
 
     // Auto-select category if passed in searchParams

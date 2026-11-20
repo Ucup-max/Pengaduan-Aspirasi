@@ -23,9 +23,9 @@ export async function middleware(request: NextRequest) {
   }
 
   const isAuthenticated = !!userSession && !!userSession.role;
-  const isDosen = userSession?.role === 'dosen';
+  const isStaff = userSession?.role === 'dosen' || userSession?.role === 'petugas';
 
-  // 3. Routing aliases & normalisasi rute
+  // 3. Routing Aliases & Normalisasi
   if (pathname === '/beranda') {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
@@ -35,8 +35,8 @@ export async function middleware(request: NextRequest) {
   if (pathname === '/tiket') {
     return NextResponse.redirect(new URL('/aspirasi/riwayat', request.url));
   }
-  if (pathname === '/petugas') {
-    return NextResponse.redirect(new URL('/petugas/kelola', request.url));
+  if (pathname === '/petugas' || pathname === '/petugas/kelola') {
+    return NextResponse.redirect(new URL('/petugas/dashboard', request.url));
   }
 
   // 4. Aturan Rute Publik vs Terproteksi
@@ -46,17 +46,23 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname === '/favicon.ico';
 
-  const isDosenOnlyRoute = pathname.startsWith('/petugas/kelola');
+  const isStaffRoute = pathname.startsWith('/petugas');
+  const isStudentRoute =
+    pathname === '/dashboard' ||
+    pathname.startsWith('/aspirasi');
 
-  // Rute root '/'
+  // Rute Root '/'
   if (pathname === '/') {
-    const targetUrl = new URL(isAuthenticated ? '/dashboard' : '/login', request.url);
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+    const targetUrl = new URL(isStaff ? '/petugas/dashboard' : '/dashboard', request.url);
     return NextResponse.redirect(targetUrl);
   }
 
-  // Jika sudah login dan mencoba mengakses halaman /login, lempar ke /dashboard
+  // Jika sudah login dan mencoba mengakses halaman /login
   if (pathname === '/login' && isAuthenticated) {
-    const targetUrl = new URL('/dashboard', request.url);
+    const targetUrl = new URL(isStaff ? '/petugas/dashboard' : '/dashboard', request.url);
     return NextResponse.redirect(targetUrl);
   }
 
@@ -67,11 +73,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Jika login sebagai Mahasiswa namun mencoba mengakses rute khusus Dosen (/petugas/kelola)
-  if (isAuthenticated && isDosenOnlyRoute && !isDosen) {
+  // Jika login sebagai Mahasiswa namun mencoba mengakses rute khusus Petugas (/petugas/*)
+  if (isAuthenticated && isStaffRoute && !isStaff) {
     const forbiddenUrl = new URL('/dashboard', request.url);
     forbiddenUrl.searchParams.set('access_denied', '403');
     return NextResponse.redirect(forbiddenUrl);
+  }
+
+  // Jika login sebagai Petugas/Dosen dan membuka rute khusus Mahasiswa (/dashboard, /aspirasi/*)
+  if (isAuthenticated && isStudentRoute && isStaff) {
+    const staffHomeUrl = new URL('/petugas/dashboard', request.url);
+    return NextResponse.redirect(staffHomeUrl);
   }
 
   return response;
