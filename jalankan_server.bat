@@ -16,8 +16,8 @@ call D:\npm.cmd run dev
 if %errorlevel% neq 0 (
   echo.
   echo [ERROR] Terjadi kendala saat menjalankan server.
-  echo Mencoba alternatif dengan npx next dev...
-  call D:\npx.cmd next dev
+  echo Mencoba alternatif dengan npx next dev --webpack...
+  call D:\npx.cmd next dev --webpack
 )
 
 pause
