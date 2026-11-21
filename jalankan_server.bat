@@ -5,7 +5,7 @@ echo   MENJALANKAN PORTAL ASPIRASI MAHASISWA (NEXT.JS v2)
 echo ========================================================
 echo.
 
-cd /d "%~dp0web-v2"
+cd /d "%~dp0"
 set "PATH=D:\;%PATH%"
 
 echo Membuka server di http://localhost:3000 ...
