@@ -89,42 +89,6 @@ export default function LoginPage() {
             transparansi progres penanganan secara akuntabel, dan pastikan setiap suara mendapatkan
             tindak lanjut nyata.
           </p>
-
-          {/* Schema preview visual cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 max-w-lg">
-            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xs text-[11px] font-mono space-y-2">
-              <div className="flex items-center justify-between text-blue-400 border-b border-slate-800 pb-1.5 font-bold">
-                <span>mahasiswa</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-900/60 text-blue-300">TABLE</span>
-              </div>
-              <div className="space-y-1 text-slate-400">
-                <div className="flex justify-between">
-                  <span className="text-white">nim</span>
-                  <span className="text-[10px] text-amber-400">PRIMARY KEY</span>
-                </div>
-                <div>nama</div>
-                <div>kelas</div>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-xs text-[11px] font-mono space-y-2">
-              <div className="flex items-center justify-between text-emerald-400 border-b border-slate-800 pb-1.5 font-bold">
-                <span>aspirasi</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-900/60 text-emerald-300">TABLE</span>
-              </div>
-              <div className="space-y-1 text-slate-400">
-                <div className="flex justify-between">
-                  <span className="text-white">id_tiket</span>
-                  <span className="text-[10px] text-amber-400">PRIMARY KEY</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>nim</span>
-                  <span className="text-[10px] text-sky-400">→ mahasiswa</span>
-                </div>
-                <div>status</div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Bottom Footer Notice */}
