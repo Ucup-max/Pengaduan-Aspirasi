@@ -16,6 +16,7 @@ export interface TicketHistoryItem {
   waktu: string;
   catatan: string;
   petugas: string;
+  bukti_foto?: string | null;
 }
 
 export interface Ticket {

@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
   // 4. Aturan Rute Publik vs Terproteksi
   const isPublicRoute =
     pathname === '/login' ||
-    pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/api/') ||
     pathname.startsWith('/_next') ||
     pathname === '/favicon.ico';
 

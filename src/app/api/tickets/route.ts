@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { INITIAL_TICKETS } from '@/lib/constants';
 import { Ticket } from '@/types';
-import { mapRowToTicket } from '@/app/actions/tickets';
+import { mapRowToTicket } from '@/lib/ticket-mapper';
 
 // In-memory runtime fallback store if Supabase network is unavailable
 let runtimeTickets: Ticket[] = [...INITIAL_TICKETS];
