@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, Suspense } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -20,6 +20,7 @@ import {
   User,
   Activity,
   AlertCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { StatusBadge } from '@/components/ui/Badge';
 import { UpdateStatusModal } from '@/components/staff/UpdateStatusModal';
@@ -37,24 +38,45 @@ function PetugasDashboardContent() {
   const [categoryFilter, setCategoryFilter] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [selectedTicketForQuickUpdate, setSelectedTicketForQuickUpdate] = useState<Ticket | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Initial fetch
+  // Ambil data tiket secara real-time (tanpa cache)
+  const loadTickets = useCallback(async (showToastNotice = false) => {
+    if (showToastNotice) setIsRefreshing(true);
+    try {
+      const res = await fetch(`/api/tickets?t=${Date.now()}`, { cache: 'no-store' });
+      const data = await res.json();
+      if (data?.tickets && Array.isArray(data.tickets)) {
+        setTickets(data.tickets);
+      }
+    } catch (err) {
+      console.warn('Gagal memuat antrean tiket:', err);
+    } finally {
+      setIsLoading(false);
+      if (showToastNotice) {
+        setIsRefreshing(false);
+        showToast('Antrean tiket operasional berhasil diperbarui.', 'success');
+      }
+    }
+  }, [showToast]);
+
   useEffect(() => {
-    fetch('/api/tickets')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.tickets) {
-          setTickets(data.tickets);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setIsLoading(false));
+    loadTickets(false);
 
     const initialFilter = searchParams.get('filter');
     if (initialFilter && ['Pending', 'Diproses', 'Selesai'].includes(initialFilter)) {
       setStatusFilter(initialFilter as TicketStatus);
+    } else {
+      setStatusFilter('Semua');
     }
-  }, [searchParams]);
+
+    // Auto-refresh interval 10 detik agar tiket baru yang diajukan mahasiswa otomatis muncul
+    const timer = setInterval(() => {
+      loadTickets(false);
+    }, 10000);
+
+    return () => clearInterval(timer);
+  }, [searchParams, loadTickets]);
 
   // SLA Calculation Helper
   const getSlaIndicator = (createdAt: string, status: TicketStatus) => {
@@ -161,6 +183,16 @@ function PetugasDashboardContent() {
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={() => loadTickets(true)}
+            disabled={isRefreshing}
+            className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-700 shadow-2xs flex items-center gap-2 cursor-pointer transition-all disabled:opacity-60"
+            title="Segarkan antrean sekarang"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>{isRefreshing ? 'Menyegarkan...' : 'Segarkan Antrean'}</span>
+          </button>
           <span className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-mono font-bold text-slate-700 shadow-2xs flex items-center gap-2">
             <Activity className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
             <span>Target SLA: ≤ 24 Jam Kerja</span>

@@ -30,19 +30,25 @@ export function PetugasSidebar({ user, onLogout, onOpenHelp }: PetugasSidebarPro
   });
 
   useEffect(() => {
-    fetch('/api/tickets')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.tickets && Array.isArray(data.tickets)) {
-          const list = data.tickets;
-          setCounts({
-            pending: list.filter((t: any) => t.status === 'Pending').length,
-            diproses: list.filter((t: any) => t.status === 'Diproses').length,
-            selesai: list.filter((t: any) => t.status === 'Selesai').length,
-          });
-        }
-      })
-      .catch(() => {});
+    const fetchCounts = () => {
+      fetch(`/api/tickets?t=${Date.now()}`, { cache: 'no-store' })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.tickets && Array.isArray(data.tickets)) {
+            const list = data.tickets;
+            setCounts({
+              pending: list.filter((t: any) => t.status === 'Pending').length,
+              diproses: list.filter((t: any) => t.status === 'Diproses').length,
+              selesai: list.filter((t: any) => t.status === 'Selesai').length,
+            });
+          }
+        })
+        .catch(() => {});
+    };
+
+    fetchCounts();
+    const interval = setInterval(fetchCounts, 10000);
+    return () => clearInterval(interval);
   }, [pathname]);
 
   const navLinks = [

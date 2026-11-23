@@ -39,24 +39,31 @@ function MahasiswaDashboardContent() {
       })
       .catch(() => {});
 
-    // 2. Ambil data tiket dan cari 1 tiket terakhir mahasiswa ini
-    fetch('/api/tickets')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.tickets && Array.isArray(data.tickets)) {
-          const list: Ticket[] = data.tickets;
-          setTickets(list);
-          if (list.length > 0) {
-            setLatestTicket(list[0]);
+    // 2. Ambil data tiket secara real-time (tanpa cache)
+    const fetchTickets = () => {
+      fetch(`/api/tickets?t=${Date.now()}`, { cache: 'no-store' })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.tickets && Array.isArray(data.tickets)) {
+            const list: Ticket[] = data.tickets;
+            setTickets(list);
+            if (list.length > 0) {
+              setLatestTicket(list[0]);
+            }
           }
-        }
-      })
-      .catch(() => {});
+        })
+        .catch(() => {});
+    };
+
+    fetchTickets();
+    const timer = setInterval(fetchTickets, 10000);
 
     // Periksa jika diarahkan dari 403 Forbidden
     if (searchParams.get('access_denied') === '403') {
       setIsAccessDeniedOpen(true);
     }
+
+    return () => clearInterval(timer);
   }, [searchParams]);
 
   // Statistik personal mahasiswa

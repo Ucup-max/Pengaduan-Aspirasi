@@ -126,29 +126,74 @@ export function TicketForm({ user, onSuccess }: TicketFormProps) {
     setIsSubmitting(true);
 
     try {
-      // Eksekusi Next.js Server Action
-      const result = await createTicketAction({
-        nomor_tiket: nomorTiket,
-        nama_pelapor: cleanNama,
-        kategori,
-        lokasi: cleanLokasi,
-        deskripsi: cleanDeskripsi,
-        is_anonim: isAnonim,
-        lampiran_foto: lampiranFoto,
-      });
+      let createdTicket: any = null;
+      let submitError = '';
 
-      if (!result.success || !result.ticket) {
-        setValidationError(result.error || 'Gagal menyimpan tiket.');
+      // Jalur 1: Eksekusi Next.js Server Action
+      try {
+        const result = await createTicketAction({
+          nomor_tiket: nomorTiket,
+          nama_pelapor: cleanNama,
+          kategori,
+          lokasi: cleanLokasi,
+          deskripsi: cleanDeskripsi,
+          is_anonim: isAnonim,
+          lampiran_foto: lampiranFoto,
+        });
+
+        if (result?.success && result?.ticket) {
+          createdTicket = result.ticket;
+        } else {
+          submitError = result?.error || '';
+        }
+      } catch (actionErr: any) {
+        console.warn('Server Action createTicketAction gagal, mencoba fallback ke API route:', actionErr);
+      }
+
+      // Jalur 2: Fallback instan ke REST API jika Server Action terkendala di serverless
+      if (!createdTicket) {
+        try {
+          const apiRes = await fetch('/api/tickets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nomor_tiket: nomorTiket,
+              nama_pelapor: isAnonim ? 'Sivitas Akademika (Anonim)' : cleanNama,
+              kategori,
+              lokasi: cleanLokasi,
+              deskripsi: cleanDeskripsi,
+              is_anonim: isAnonim,
+              lampiran_foto: lampiranFoto,
+              status: 'Pending',
+            }),
+          });
+
+          if (apiRes.ok) {
+            const apiData = await apiRes.json();
+            if (apiData.ticket) {
+              createdTicket = apiData.ticket;
+            }
+          } else {
+            const errData = await apiRes.json().catch(() => ({}));
+            submitError = errData.error || submitError || 'Gagal menyimpan aspirasi ke basis data.';
+          }
+        } catch (apiErr: any) {
+          submitError = apiErr?.message || submitError || 'Gagal terhubung ke server.';
+        }
+      }
+
+      if (!createdTicket) {
+        setValidationError(submitError || 'Gagal menyimpan tiket aspirasi.');
         setIsSubmitting(false);
         return;
       }
 
-      showToast(`Aspirasi ${result.ticket.nomor_tiket} berhasil diajukan!`, 'success');
+      showToast(`Aspirasi ${createdTicket.nomor_tiket} berhasil diajukan!`, 'success');
 
       if (onSuccess) {
-        onSuccess(result.ticket.nomor_tiket);
+        onSuccess(createdTicket.nomor_tiket);
       } else {
-        router.push(`/aspirasi/riwayat?ticket=${encodeURIComponent(result.ticket.nomor_tiket)}&recent=1`);
+        router.push(`/aspirasi/riwayat?ticket=${encodeURIComponent(createdTicket.nomor_tiket)}&recent=1`);
       }
     } catch (err: any) {
       setValidationError(err?.message || 'Terjadi kesalahan sistem saat mengirim aspirasi.');

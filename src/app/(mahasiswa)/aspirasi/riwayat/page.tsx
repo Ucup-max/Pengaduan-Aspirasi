@@ -25,7 +25,7 @@ function RiwayatContent() {
   const isRecent = searchParams.get('recent') === '1';
 
   useEffect(() => {
-    fetch('/api/tickets')
+    fetch(`/api/tickets?t=${Date.now()}`, { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data.tickets) {

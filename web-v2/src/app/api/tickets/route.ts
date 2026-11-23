@@ -4,8 +4,17 @@ import { INITIAL_TICKETS } from '@/lib/constants';
 import { Ticket } from '@/types';
 import { mapRowToTicket } from '@/lib/ticket-mapper';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // In-memory runtime fallback store if Supabase network is unavailable
 let runtimeTickets: Ticket[] = [...INITIAL_TICKETS];
+
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  'CDN-Cache-Control': 'no-store',
+  'Vercel-CDN-Cache-Control': 'no-store',
+};
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -28,10 +37,10 @@ export async function GET(request: Request) {
         const found = mappedTickets.find(
           (t) => t.nomor_tiket.toLowerCase() === ticketNumber.toLowerCase()
         );
-        return NextResponse.json({ tickets: found ? [found] : [] });
+        return NextResponse.json({ tickets: found ? [found] : [] }, { headers: NO_CACHE_HEADERS });
       }
 
-      return NextResponse.json({ tickets: mappedTickets });
+      return NextResponse.json({ tickets: mappedTickets }, { headers: NO_CACHE_HEADERS });
     }
   } catch (err) {
     console.warn('Supabase query error, using runtime cache:', err);
@@ -42,10 +51,10 @@ export async function GET(request: Request) {
     const found = runtimeTickets.find(
       (t) => t.nomor_tiket.toLowerCase() === ticketNumber.toLowerCase()
     );
-    return NextResponse.json({ tickets: found ? [found] : [] });
+    return NextResponse.json({ tickets: found ? [found] : [] }, { headers: NO_CACHE_HEADERS });
   }
 
-  return NextResponse.json({ tickets: runtimeTickets });
+  return NextResponse.json({ tickets: runtimeTickets }, { headers: NO_CACHE_HEADERS });
 }
 
 export async function POST(request: Request) {
