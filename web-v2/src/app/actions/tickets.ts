@@ -273,13 +273,44 @@ export async function updateTicketStatusAction(payload: {
 
   const sanitizedCatatan = escapeHtml(cleanCatatan);
   const petugasName = payload.petugasNama || user?.nama || 'Petugas Helpdesk';
+  const rawId = String(payload.ticketId).trim();
+
+  // 1. Ambil data tiket target langsung dari Supabase
+  let ticketObj: Ticket | null = null;
+  try {
+    const supabase = await createClient();
+    let query = supabase.from('tickets').select('*');
+    if (!isNaN(Number(rawId))) {
+      query = query.or(`nomor_tiket.eq.${rawId},id.eq.${Number(rawId)}`);
+    } else {
+      query = query.eq('nomor_tiket', rawId);
+    }
+
+    const { data: dbRow, error } = await query.single();
+    if (!error && dbRow) {
+      ticketObj = mapRowToTicket(dbRow);
+    }
+  } catch (err) {
+    console.warn('Gagal membaca tiket dari Supabase:', err);
+  }
+
+  // Fallback ke serverTicketCache jika query Supabase belum membuahkan hasil
+  if (!ticketObj) {
+    ticketObj = serverTicketCache.find(
+      (t) => t.id === Number(payload.ticketId) || t.nomor_tiket === rawId
+    ) || null;
+  }
+
+  if (!ticketObj) {
+    return { success: false, error: 'Tiket tidak ditemukan di dalam sistem.' };
+  }
 
   const photoInput = payload.buktiFoto || payload.buktiFotoBase64;
   let uploadedProofUrl = null;
   if (photoInput) {
     uploadedProofUrl = await uploadEvidencePhotoAction(
       photoInput,
-      `PROOF-${payload.ticketId}`
+      `PROOF-${ticketObj.nomor_tiket}`
     );
   }
 
@@ -291,11 +322,7 @@ export async function updateTicketStatusAction(payload: {
     bukti_foto: uploadedProofUrl,
   };
 
-  const currentTicket = serverTicketCache.find(
-    (t) => t.id === Number(payload.ticketId) || t.nomor_tiket === payload.ticketId
-  );
-  const updatedHistory = currentTicket ? [...(currentTicket.riwayat || []), historyItem] : [historyItem];
-
+  const updatedHistory = [...(ticketObj.riwayat || []), historyItem];
   let updateSuccess = false;
 
   // Tahap 1: Coba update penuh jika kolom tersedia
@@ -312,7 +339,7 @@ export async function updateTicketStatusAction(payload: {
 
     const { error } = await (supabase.from('tickets') as any)
       .update(updatePayload)
-      .eq('nomor_tiket', currentTicket?.nomor_tiket || payload.ticketId);
+      .eq('nomor_tiket', ticketObj.nomor_tiket);
 
     if (!error) {
       updateSuccess = true;
@@ -327,10 +354,10 @@ export async function updateTicketStatusAction(payload: {
       const supabase = await createClient();
       const { data: existingRow } = await (supabase.from('tickets') as any)
         .select('deskripsi')
-        .eq('nomor_tiket', currentTicket?.nomor_tiket || payload.ticketId)
+        .eq('nomor_tiket', ticketObj.nomor_tiket)
         .single();
 
-      let newDeskripsi = existingRow?.deskripsi || currentTicket?.deskripsi || '';
+      let newDeskripsi = existingRow?.deskripsi || ticketObj.deskripsi || '';
       if (sanitizedCatatan) {
         newDeskripsi += `\n\n[Catatan Petugas: ${sanitizedCatatan}]`;
       }
@@ -343,27 +370,35 @@ export async function updateTicketStatusAction(payload: {
           status: payload.newStatus,
           deskripsi: newDeskripsi.trim(),
         })
-        .eq('nomor_tiket', currentTicket?.nomor_tiket || payload.ticketId);
+        .eq('nomor_tiket', ticketObj.nomor_tiket);
+      updateSuccess = true;
     } catch (err) {
       console.warn('Fallback status update warning:', err);
     }
   }
 
-  if (currentTicket) {
-    currentTicket.status = payload.newStatus;
-    currentTicket.catatan_penanganan = sanitizedCatatan;
-    currentTicket.riwayat = updatedHistory;
-    if (uploadedProofUrl) {
-      currentTicket.bukti_penyelesaian = uploadedProofUrl;
-    }
-  }
+  const finalUpdatedTicket: Ticket = {
+    ...ticketObj,
+    status: payload.newStatus,
+    catatan_penanganan: sanitizedCatatan,
+    riwayat: updatedHistory,
+    bukti_penyelesaian: uploadedProofUrl || ticketObj.bukti_penyelesaian,
+  };
+
+  // Update server cache
+  serverTicketCache = [
+    finalUpdatedTicket,
+    ...serverTicketCache.filter((t) => t.nomor_tiket !== finalUpdatedTicket.nomor_tiket),
+  ];
 
   revalidatePath('/dashboard');
   revalidatePath('/aspirasi/riwayat');
   revalidatePath('/petugas/dashboard');
   revalidatePath('/petugas/kelola');
+  revalidatePath(`/petugas/tiket/${finalUpdatedTicket.nomor_tiket}`);
+  revalidatePath(`/aspirasi/${finalUpdatedTicket.nomor_tiket}`);
 
-  return { success: true, ticket: currentTicket };
+  return { success: true, ticket: finalUpdatedTicket };
 }
 
 /**
@@ -375,6 +410,28 @@ export async function confirmTicketResolutionAction(payload: {
   feedback?: string;
 }) {
   const sanitizedFeedback = escapeHtml(payload.feedback?.trim() || '');
+  const rawId = String(payload.ticketId).trim();
+
+  let ticketObj: Ticket | null = null;
+  try {
+    const supabase = await createClient();
+    let query = supabase.from('tickets').select('*');
+    if (!isNaN(Number(rawId))) {
+      query = query.or(`nomor_tiket.eq.${rawId},id.eq.${Number(rawId)}`);
+    } else {
+      query = query.eq('nomor_tiket', rawId);
+    }
+    const { data: dbRow } = await query.single();
+    if (dbRow) ticketObj = mapRowToTicket(dbRow);
+  } catch {}
+
+  if (!ticketObj) {
+    ticketObj = serverTicketCache.find(
+      (t) => t.id === Number(payload.ticketId) || t.nomor_tiket === rawId
+    ) || null;
+  }
+
+  const targetCode = ticketObj?.nomor_tiket || rawId;
 
   try {
     const supabase = await createClient();
@@ -384,25 +441,26 @@ export async function confirmTicketResolutionAction(payload: {
         rating: payload.rating,
         feedback: sanitizedFeedback,
       })
-      .eq('nomor_tiket', payload.ticketId);
+      .eq('nomor_tiket', targetCode);
   } catch (err) {
     console.warn('Supabase confirm finish fallback:', err);
   }
 
-  const currentTicket = serverTicketCache.find(
-    (t) => t.id === Number(payload.ticketId) || t.nomor_tiket === payload.ticketId
-  );
-  if (currentTicket) {
-    currentTicket.konfirmasi_selesai = true;
-    currentTicket.rating = payload.rating;
-    currentTicket.feedback = sanitizedFeedback;
+  if (ticketObj) {
+    ticketObj.konfirmasi_selesai = true;
+    ticketObj.rating = payload.rating;
+    ticketObj.feedback = sanitizedFeedback;
+    serverTicketCache = [
+      ticketObj,
+      ...serverTicketCache.filter((t) => t.nomor_tiket !== ticketObj!.nomor_tiket),
+    ];
   }
 
   revalidatePath('/dashboard');
   revalidatePath('/aspirasi/riwayat');
   revalidatePath('/petugas/dashboard');
 
-  return { success: true };
+  return { success: true, ticket: ticketObj };
 }
 
 /**
@@ -416,6 +474,28 @@ export async function reopenTicketAction(payload: {
   const rawAlasan = payload.alasan || payload.reason || 'Aspirasi dilaporkan belum tuntas oleh mahasiswa.';
   const sanitizedAlasan = escapeHtml(rawAlasan.trim());
   const user = await getServerSessionUser();
+  const rawId = String(payload.ticketId).trim();
+
+  let ticketObj: Ticket | null = null;
+  try {
+    const supabase = await createClient();
+    let query = supabase.from('tickets').select('*');
+    if (!isNaN(Number(rawId))) {
+      query = query.or(`nomor_tiket.eq.${rawId},id.eq.${Number(rawId)}`);
+    } else {
+      query = query.eq('nomor_tiket', rawId);
+    }
+    const { data: dbRow } = await query.single();
+    if (dbRow) ticketObj = mapRowToTicket(dbRow);
+  } catch {}
+
+  if (!ticketObj) {
+    ticketObj = serverTicketCache.find(
+      (t) => t.id === Number(payload.ticketId) || t.nomor_tiket === rawId
+    ) || null;
+  }
+
+  const targetCode = ticketObj?.nomor_tiket || rawId;
 
   const historyItem: TicketHistoryItem = {
     status: 'Diproses',
@@ -424,10 +504,7 @@ export async function reopenTicketAction(payload: {
     petugas: user?.nama || 'Mahasiswa',
   };
 
-  const currentTicket = serverTicketCache.find(
-    (t) => t.id === Number(payload.ticketId) || t.nomor_tiket === payload.ticketId
-  );
-  const updatedHistory = currentTicket ? [...(currentTicket.riwayat || []), historyItem] : [historyItem];
+  const updatedHistory = [...(ticketObj?.riwayat || []), historyItem];
 
   try {
     const supabase = await createClient();
@@ -437,23 +514,40 @@ export async function reopenTicketAction(payload: {
         konfirmasi_selesai: false,
         riwayat: updatedHistory as any,
       })
-      .eq('nomor_tiket', currentTicket?.nomor_tiket || payload.ticketId);
+      .eq('nomor_tiket', targetCode);
   } catch (err) {
     console.warn('Supabase reopen fallback:', err);
   }
 
-  if (currentTicket) {
-    currentTicket.status = 'Diproses';
-    currentTicket.konfirmasi_selesai = false;
-    currentTicket.riwayat = updatedHistory;
-  }
+  const finalTicket: Ticket = ticketObj
+    ? {
+        ...ticketObj,
+        status: 'Diproses',
+        konfirmasi_selesai: false,
+        riwayat: updatedHistory,
+      }
+    : ({
+        id: Date.now(),
+        nomor_tiket: targetCode,
+        nama_pelapor: user?.nama || 'Mahasiswa',
+        status: 'Diproses',
+        kategori: 'Umum',
+        deskripsi: sanitizedAlasan,
+        created_at: new Date().toISOString(),
+        riwayat: updatedHistory,
+      } as any);
+
+  serverTicketCache = [
+    finalTicket,
+    ...serverTicketCache.filter((t) => t.nomor_tiket !== finalTicket.nomor_tiket),
+  ];
 
   revalidatePath('/dashboard');
   revalidatePath('/aspirasi/riwayat');
   revalidatePath('/petugas/dashboard');
   revalidatePath('/petugas/kelola');
 
-  return { success: true, ticket: currentTicket };
+  return { success: true, ticket: finalTicket };
 }
 
 /**

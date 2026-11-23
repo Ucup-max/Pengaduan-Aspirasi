@@ -144,21 +144,61 @@ function PetugasDashboardContent() {
     catatan: string
   ) => {
     try {
-      const res = await updateTicketStatusAction({
-        ticketId,
-        newStatus,
-        catatan,
-      });
+      let updatedTicket: Ticket | null = null;
+      let errorMsg = '';
 
-      if (!res.success || !res.ticket) {
-        showToast(res.error || 'Gagal memperbarui status.', 'error');
+      // Jalur 1: Server Action
+      try {
+        const res = await updateTicketStatusAction({
+          ticketId,
+          newStatus,
+          catatan,
+        });
+        if (res?.success && res?.ticket) {
+          updatedTicket = res.ticket;
+        } else {
+          errorMsg = res?.error || '';
+        }
+      } catch (err: any) {
+        console.warn('Server Action update status gagal, mencoba jalur API fallback:', err);
+      }
+
+      // Jalur 2: Fallback ke PATCH /api/tickets
+      if (!updatedTicket) {
+        try {
+          const apiRes = await fetch('/api/tickets', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ticketId,
+              status: newStatus,
+              catatan,
+            }),
+          });
+          if (apiRes.ok) {
+            const apiData = await apiRes.json();
+            if (apiData?.ticket) {
+              updatedTicket = apiData.ticket;
+            }
+          } else {
+            const errData = await apiRes.json().catch(() => ({}));
+            errorMsg = errData?.error || errorMsg;
+          }
+        } catch (apiErr: any) {
+          errorMsg = apiErr?.message || errorMsg;
+        }
+      }
+
+      if (!updatedTicket) {
+        showToast(errorMsg || 'Gagal memperbarui status tiket.', 'error');
         return;
       }
 
       setTickets((prev) =>
-        prev.map((t) => (t.nomor_tiket === res.ticket!.nomor_tiket ? res.ticket! : t))
+        prev.map((t) => (t.nomor_tiket === updatedTicket!.nomor_tiket ? updatedTicket! : t))
       );
-      showToast(`Status tiket ${res.ticket.nomor_tiket} berhasil diubah ke ${newStatus}!`, 'success');
+      showToast(`Status tiket ${updatedTicket.nomor_tiket} berhasil diubah ke ${newStatus}!`, 'success');
+      loadTickets(false);
     } catch {
       showToast('Gagal menghubungi server.', 'error');
     }

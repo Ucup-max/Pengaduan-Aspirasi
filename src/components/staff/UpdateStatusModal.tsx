@@ -51,7 +51,7 @@ export function UpdateStatusModal({
 
     setIsSubmitting(true);
     try {
-      await onUpdate(ticket.id, newStatus, cleanCatatan);
+      await onUpdate(ticket.nomor_tiket || ticket.id, newStatus, cleanCatatan);
       onClose();
     } catch {
       setErrorMsg('Gagal memperbarui status tiket. Silakan coba kembali.');

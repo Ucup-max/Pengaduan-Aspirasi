@@ -96,22 +96,63 @@ export default function PetugasTicketActionPage({ params }: PageProps) {
     setIsSubmitting(true);
 
     try {
-      const res = await updateTicketStatusAction({
-        ticketId: ticket!.nomor_tiket,
-        newStatus,
-        catatan: catatan.trim(),
-        buktiFoto: proofPhoto,
-      });
+      let updatedTicket: Ticket | null = null;
+      let errorMsg = '';
 
-      if (!res.success || !res.ticket) {
-        setErrorValidation(res.error || 'Gagal menyimpan status tiket.');
+      // Jalur 1: Server Action
+      try {
+        const res = await updateTicketStatusAction({
+          ticketId: ticket!.nomor_tiket,
+          newStatus,
+          catatan: catatan.trim(),
+          buktiFoto: proofPhoto,
+        });
+
+        if (res?.success && res?.ticket) {
+          updatedTicket = res.ticket;
+        } else {
+          errorMsg = res?.error || '';
+        }
+      } catch (err: any) {
+        console.warn('Server Action update status gagal, mencoba jalur API fallback:', err);
+      }
+
+      // Jalur 2: Fallback ke PATCH /api/tickets
+      if (!updatedTicket) {
+        try {
+          const apiRes = await fetch('/api/tickets', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ticketId: ticket!.nomor_tiket,
+              status: newStatus,
+              catatan: catatan.trim(),
+            }),
+          });
+
+          if (apiRes.ok) {
+            const apiData = await apiRes.json();
+            if (apiData?.ticket) {
+              updatedTicket = apiData.ticket;
+            }
+          } else {
+            const errData = await apiRes.json().catch(() => ({}));
+            errorMsg = errData?.error || errorMsg;
+          }
+        } catch (apiErr: any) {
+          errorMsg = apiErr?.message || errorMsg;
+        }
+      }
+
+      if (!updatedTicket) {
+        setErrorValidation(errorMsg || 'Gagal menyimpan status tiket.');
         setIsSubmitting(false);
         return;
       }
 
-      setTicket(res.ticket);
+      setTicket(updatedTicket);
       showToast(
-        `Berhasil memperbarui status tiket ${res.ticket.nomor_tiket} menjadi "${newStatus}"!`,
+        `Berhasil memperbarui status tiket ${updatedTicket.nomor_tiket} menjadi "${newStatus}"!`,
         'success'
       );
       setIsSubmitting(false);

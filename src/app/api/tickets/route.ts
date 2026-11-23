@@ -141,77 +141,98 @@ export async function PATCH(request: Request) {
   try {
     const body = await request.json();
     const { ticketId, status, catatan, petugas, konfirmasi_selesai, rating, feedback } = body;
+    const rawId = String(ticketId).trim();
 
-    const ticketIndex = runtimeTickets.findIndex(
-      (t) => t.id === Number(ticketId) || t.nomor_tiket === ticketId
-    );
+    let targetTicket: Ticket | null = null;
+    const supabase = await createClient();
 
-    let currentTicket = ticketIndex !== -1 ? runtimeTickets[ticketIndex] : null;
-
-    if (currentTicket) {
-      if (status) currentTicket.status = status;
-      if (catatan) {
-        currentTicket.catatan_penanganan = catatan;
-        const historyItem = {
-          status: status || currentTicket.status,
-          waktu: new Date().toISOString(),
-          catatan,
-          petugas: petugas || 'Petugas Helpdesk',
-        };
-        currentTicket.riwayat = [...(currentTicket.riwayat || []), historyItem];
+    try {
+      let query = supabase.from('tickets').select('*');
+      if (!isNaN(Number(rawId))) {
+        query = query.or(`nomor_tiket.eq.${rawId},id.eq.${Number(rawId)}`);
+      } else {
+        query = query.eq('nomor_tiket', rawId);
       }
-      if (typeof konfirmasi_selesai === 'boolean') currentTicket.konfirmasi_selesai = konfirmasi_selesai;
-      if (typeof rating === 'number') currentTicket.rating = rating;
-      if (typeof feedback === 'string') currentTicket.feedback = feedback;
+      const { data: dbRow } = await query.single();
+      if (dbRow) {
+        targetTicket = mapRowToTicket(dbRow);
+      }
+    } catch {}
 
-      runtimeTickets[ticketIndex] = { ...currentTicket };
+    if (!targetTicket) {
+      targetTicket = runtimeTickets.find(
+        (t) => t.id === Number(ticketId) || t.nomor_tiket === rawId
+      ) || null;
     }
 
-    // Update Supabase Cloud
+    if (!targetTicket) {
+      return NextResponse.json({ error: 'Tiket tidak ditemukan' }, { status: 404 });
+    }
+
+    const updatedHistory = [...(targetTicket.riwayat || [])];
+    if (catatan) {
+      updatedHistory.push({
+        status: status || targetTicket.status,
+        waktu: new Date().toISOString(),
+        catatan,
+        petugas: petugas || 'Petugas Helpdesk',
+      });
+    }
+
+    // Update Supabase Cloud (Tahap 1: skema penuh)
     let updateSuccess = false;
     try {
-      const supabase = await createClient();
       const { error } = await (supabase.from('tickets') as any)
         .update({
-          status: status || currentTicket?.status,
-          catatan_penanganan: catatan || currentTicket?.catatan_penanganan,
-          riwayat: currentTicket?.riwayat as any,
-          konfirmasi_selesai: konfirmasi_selesai,
-          rating: rating,
-          feedback: feedback,
+          status: status || targetTicket.status,
+          catatan_penanganan: catatan || targetTicket.catatan_penanganan,
+          riwayat: updatedHistory as any,
+          konfirmasi_selesai: typeof konfirmasi_selesai === 'boolean' ? konfirmasi_selesai : targetTicket.konfirmasi_selesai,
+          rating: typeof rating === 'number' ? rating : targetTicket.rating,
+          feedback: typeof feedback === 'string' ? feedback : targetTicket.feedback,
         })
-        .eq('nomor_tiket', currentTicket?.nomor_tiket || ticketId);
+        .eq('nomor_tiket', targetTicket.nomor_tiket);
 
       if (!error) updateSuccess = true;
     } catch {
       // fallback
     }
 
+    // Tahap 2: fallback skema dasar
     if (!updateSuccess) {
       try {
-        const supabase = await createClient();
-        const { data: existingRow } = await (supabase.from('tickets') as any)
-          .select('deskripsi')
-          .eq('nomor_tiket', currentTicket?.nomor_tiket || ticketId)
-          .single();
-
-        let newDeskripsi = existingRow?.deskripsi || currentTicket?.deskripsi || '';
+        let newDeskripsi = targetTicket.deskripsi || '';
         if (catatan) {
           newDeskripsi += `\n\n[Catatan Petugas: ${catatan}]`;
         }
 
         await (supabase.from('tickets') as any)
           .update({
-            status: status || currentTicket?.status,
+            status: status || targetTicket.status,
             deskripsi: newDeskripsi.trim(),
           })
-          .eq('nomor_tiket', currentTicket?.nomor_tiket || ticketId);
+          .eq('nomor_tiket', targetTicket.nomor_tiket);
       } catch (e) {
         console.warn('Supabase fallback status update warning:', e);
       }
     }
 
-    return NextResponse.json({ success: true, ticket: currentTicket });
+    const finalUpdatedTicket: Ticket = {
+      ...targetTicket,
+      status: status || targetTicket.status,
+      catatan_penanganan: catatan || targetTicket.catatan_penanganan,
+      riwayat: updatedHistory,
+      konfirmasi_selesai: typeof konfirmasi_selesai === 'boolean' ? konfirmasi_selesai : targetTicket.konfirmasi_selesai,
+      rating: typeof rating === 'number' ? rating : targetTicket.rating,
+      feedback: typeof feedback === 'string' ? feedback : targetTicket.feedback,
+    };
+
+    runtimeTickets = [
+      finalUpdatedTicket,
+      ...runtimeTickets.filter((t) => t.nomor_tiket !== finalUpdatedTicket.nomor_tiket),
+    ];
+
+    return NextResponse.json({ success: true, ticket: finalUpdatedTicket }, { headers: NO_CACHE_HEADERS });
   } catch (error) {
     return NextResponse.json({ error: 'Gagal memperbarui tiket' }, { status: 500 });
   }
