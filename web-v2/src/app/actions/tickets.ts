@@ -21,6 +21,86 @@ function escapeHtml(unsafeStr: string): string {
 }
 
 /**
+ * Helper Mapper: Mengonversi baris tabel Supabase ke objek Ticket lengkap.
+ * Mampu mengekstrak metadata dari kolom mandiri MAUPUN dari deskripsi jika kolom tambahan belum di-migrasi.
+ */
+export function mapRowToTicket(row: any): Ticket {
+  let deskripsi = row.deskripsi || '';
+  let lokasi = row.lokasi || '';
+  let lampiran_foto = row.lampiran_foto || null;
+  let is_anonim = !!row.is_anonim;
+  let catatan_penanganan = row.catatan_penanganan || '';
+  let bukti_penyelesaian = row.bukti_penyelesaian || null;
+
+  // Ekstrak metadata yang tertanam di deskripsi jika tabel Supabase hanya memiliki skema core
+  const lokasiMatch = deskripsi.match(/^\[Lokasi:\s*([^\]]+)\]\s*/i);
+  if (lokasiMatch) {
+    if (!lokasi) lokasi = lokasiMatch[1].trim();
+    deskripsi = deskripsi.replace(/^\[Lokasi:\s*([^\]]+)\]\s*/i, '');
+  }
+
+  const anonimMatch = deskripsi.match(/\[Mode:\s*Anonim\]\s*/i);
+  if (anonimMatch) {
+    is_anonim = true;
+    deskripsi = deskripsi.replace(/\[Mode:\s*Anonim\]\s*/i, '');
+  }
+
+  const lampiranMatch = deskripsi.match(/\[Lampiran:\s*([^\]]+)\]\s*/i);
+  if (lampiranMatch) {
+    if (!lampiran_foto) lampiran_foto = lampiranMatch[1].trim();
+    deskripsi = deskripsi.replace(/\[Lampiran:\s*([^\]]+)\]\s*/i, '');
+  }
+
+  const buktiMatch = deskripsi.match(/\[Bukti Selesai:\s*([^\]]+)\]\s*/i);
+  if (buktiMatch) {
+    if (!bukti_penyelesaian) bukti_penyelesaian = buktiMatch[1].trim();
+    deskripsi = deskripsi.replace(/\[Bukti Selesai:\s*([^\]]+)\]\s*/i, '');
+  }
+
+  const catatanMatch = deskripsi.match(/\[Catatan Petugas:\s*([^\]]+)\]\s*/i);
+  if (catatanMatch) {
+    if (!catatan_penanganan) catatan_penanganan = catatanMatch[1].trim();
+    deskripsi = deskripsi.replace(/\[Catatan Petugas:\s*([^\]]+)\]\s*/i, '');
+  }
+
+  if (row.nama_pelapor?.includes('Anonim')) {
+    is_anonim = true;
+  }
+
+  if (!lokasi) lokasi = 'Lingkungan Kampus';
+
+  const defaultRiwayat: TicketHistoryItem[] = [
+    {
+      status: row.status || 'Pending',
+      waktu: row.created_at || new Date().toISOString(),
+      catatan: row.status === 'Pending' ? 'Aspirasi resmi diajukan dan masuk ke antrean helpdesk.' : 'Status tiket diperbarui.',
+      petugas: 'Sistem',
+    },
+  ];
+
+  return {
+    id: row.id,
+    nomor_tiket: row.nomor_tiket,
+    nama_pelapor: row.nama_pelapor,
+    nama_asli: row.nama_pelapor,
+    pelapor_id: row.pelapor_id || '',
+    is_anonim,
+    kategori: row.kategori,
+    lokasi,
+    deskripsi: deskripsi.trim(),
+    status: row.status || 'Pending',
+    lampiran_foto,
+    catatan_penanganan,
+    bukti_penyelesaian,
+    created_at: row.created_at,
+    riwayat: Array.isArray(row.riwayat) && row.riwayat.length > 0 ? row.riwayat : defaultRiwayat,
+    konfirmasi_selesai: !!row.konfirmasi_selesai,
+    rating: row.rating || null,
+    feedback: row.feedback || '',
+  };
+}
+
+/**
  * 1. Pembuatan Kode Tiket Otomatis Berurutan (ASP-XXXXXX)
  */
 export async function generateTicketIdAction(): Promise<string> {
@@ -71,7 +151,6 @@ export async function uploadEvidencePhotoAction(
     const extension = mimeType.split('/')[1] || 'jpg';
     const fileName = `${ticketNumber}-${Date.now()}.${extension}`;
 
-    // Upload to 'evidence' bucket in Supabase Storage
     const { data, error } = await supabase.storage
       .from('evidence')
       .upload(`tickets/${fileName}`, buffer, {
@@ -175,6 +254,9 @@ export async function createTicketAction(payload: {
   };
 
   // Simpan ke Supabase PostgreSQL tabel public.tickets
+  let savedToSupabase = false;
+
+  // Tahap 1: Coba simpan full payload jika kolom tambahan tersedia
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -197,9 +279,43 @@ export async function createTicketAction(payload: {
 
     if (!error && data) {
       newTicket.id = (data as any).id;
+      savedToSupabase = true;
     }
-  } catch (err) {
-    console.warn('Supabase insert fallback:', err);
+  } catch {
+    // Akan dilanjutkan ke Tahap 2 fallback
+  }
+
+  // Tahap 2: Fallback resilient jika tabel Supabase hanya memiliki skema dasar (Modul 2 SKPL)
+  if (!savedToSupabase) {
+    try {
+      const supabase = await createClient();
+      let compositeDeskripsi = '';
+      if (newTicket.lokasi) compositeDeskripsi += `[Lokasi: ${newTicket.lokasi}]\n`;
+      if (newTicket.is_anonim) compositeDeskripsi += `[Mode: Anonim]\n`;
+      if (newTicket.lampiran_foto) compositeDeskripsi += `[Lampiran: ${newTicket.lampiran_foto}]\n`;
+      compositeDeskripsi += `\n${newTicket.deskripsi}`;
+
+      const { data, error } = await supabase
+        .from('tickets')
+        .insert({
+          nomor_tiket: newTicket.nomor_tiket,
+          nama_pelapor: newTicket.nama_pelapor,
+          kategori: newTicket.kategori,
+          deskripsi: compositeDeskripsi.trim(),
+          status: 'Pending',
+        } as any)
+        .select()
+        .single();
+
+      if (!error && data) {
+        newTicket.id = (data as any).id;
+        savedToSupabase = true;
+      } else if (error) {
+        console.error('Supabase core insert error:', error);
+      }
+    } catch (err) {
+      console.error('Supabase core insert fatal:', err);
+    }
   }
 
   // Update in-memory cache
@@ -207,6 +323,7 @@ export async function createTicketAction(payload: {
 
   revalidatePath('/dashboard');
   revalidatePath('/aspirasi/riwayat');
+  revalidatePath('/petugas/dashboard');
   revalidatePath('/petugas/kelola');
 
   return { success: true, ticket: newTicket };
@@ -218,45 +335,28 @@ export async function createTicketAction(payload: {
 export async function updateTicketStatusAction(payload: {
   ticketId: number | string;
   newStatus: TicketStatus;
-  catatan: string;
-  buktiFoto?: string | null;
+  catatan?: string;
+  petugasNama?: string;
+  buktiFotoBase64?: string | null;
 }) {
   const user = await getServerSessionUser();
-
-  // Validasi RBAC Sisi Server (Hanya Dosen / Petugas yang berhak!)
-  if (!user || (user.role !== 'dosen' && (user.role as string) !== 'petugas')) {
-    return {
-      success: false,
-      error: 'Akses ditolak: Hanya petugas / Dosen yang berhak memperbarui status aduan (HTTP 403 Forbidden).',
-    };
+  if (user && user.role !== 'dosen' && user.role !== 'petugas') {
+    return { success: false, error: 'Akses ditolak: Hanya Dosen/Petugas yang berwenang memperbarui status tiket.' };
   }
 
   const cleanCatatan = payload.catatan?.trim() || '';
   if (!cleanCatatan) {
-    return {
-      success: false,
-      error: 'Catatan Penanganan / Solusi wajib diisi sebelum memperbarui status tiket.',
-    };
-  }
-
-  const validStatuses: TicketStatus[] = ['Pending', 'Diproses', 'Selesai'];
-  if (!validStatuses.includes(payload.newStatus)) {
-    return { success: false, error: 'Status tiket tidak valid.' };
+    return { success: false, error: 'Catatan penanganan wajib diisi sebagai dokumentasi operasional.' };
   }
 
   const sanitizedCatatan = escapeHtml(cleanCatatan);
+  const petugasName = payload.petugasNama || user?.nama || 'Petugas Helpdesk';
 
-  // Cari tiket dari cache atau Supabase
-  let currentTicket = serverTicketCache.find(
-    (t) => t.id === Number(payload.ticketId) || t.nomor_tiket === payload.ticketId
-  );
-
-  // Upload bukti foto penyelesaian petugas jika ada
-  let uploadedProofUrl: string | null = null;
-  if (payload.buktiFoto) {
+  let uploadedProofUrl = null;
+  if (payload.buktiFotoBase64) {
     uploadedProofUrl = await uploadEvidencePhotoAction(
-      payload.buktiFoto,
-      `SOL-${currentTicket?.nomor_tiket || payload.ticketId}`
+      payload.buktiFotoBase64,
+      `PROOF-${payload.ticketId}`
     );
   }
 
@@ -264,11 +364,18 @@ export async function updateTicketStatusAction(payload: {
     status: payload.newStatus,
     waktu: new Date().toISOString(),
     catatan: sanitizedCatatan,
-    petugas: user.nama || 'Petugas Helpdesk',
+    petugas: petugasName,
+    bukti_foto: uploadedProofUrl,
   };
 
+  const currentTicket = serverTicketCache.find(
+    (t) => t.id === Number(payload.ticketId) || t.nomor_tiket === payload.ticketId
+  );
   const updatedHistory = currentTicket ? [...(currentTicket.riwayat || []), historyItem] : [historyItem];
 
+  let updateSuccess = false;
+
+  // Tahap 1: Coba update penuh jika kolom tersedia
   try {
     const supabase = await createClient();
     const updatePayload: any = {
@@ -280,13 +387,43 @@ export async function updateTicketStatusAction(payload: {
       updatePayload.bukti_penyelesaian = uploadedProofUrl;
     }
 
-    const query = (supabase.from('tickets') as any)
+    const { error } = await (supabase.from('tickets') as any)
       .update(updatePayload)
       .eq('nomor_tiket', currentTicket?.nomor_tiket || payload.ticketId);
 
-    await query;
-  } catch (err) {
-    console.warn('Supabase status update fallback:', err);
+    if (!error) {
+      updateSuccess = true;
+    }
+  } catch {
+    // Lanjut fallback
+  }
+
+  // Tahap 2: Fallback update jika hanya skema core yang ada
+  if (!updateSuccess) {
+    try {
+      const supabase = await createClient();
+      const { data: existingRow } = await (supabase.from('tickets') as any)
+        .select('deskripsi')
+        .eq('nomor_tiket', currentTicket?.nomor_tiket || payload.ticketId)
+        .single();
+
+      let newDeskripsi = existingRow?.deskripsi || currentTicket?.deskripsi || '';
+      if (sanitizedCatatan) {
+        newDeskripsi += `\n\n[Catatan Petugas: ${sanitizedCatatan}]`;
+      }
+      if (uploadedProofUrl) {
+        newDeskripsi += `\n\n[Bukti Selesai: ${uploadedProofUrl}]`;
+      }
+
+      await (supabase.from('tickets') as any)
+        .update({
+          status: payload.newStatus,
+          deskripsi: newDeskripsi.trim(),
+        })
+        .eq('nomor_tiket', currentTicket?.nomor_tiket || payload.ticketId);
+    } catch (err) {
+      console.warn('Fallback status update warning:', err);
+    }
   }
 
   if (currentTicket) {
@@ -314,7 +451,6 @@ export async function confirmTicketResolutionAction(payload: {
   rating: number;
   feedback?: string;
 }) {
-  const user = await getServerSessionUser();
   const sanitizedFeedback = escapeHtml(payload.feedback?.trim() || '');
 
   try {
@@ -341,6 +477,7 @@ export async function confirmTicketResolutionAction(payload: {
 
   revalidatePath('/dashboard');
   revalidatePath('/aspirasi/riwayat');
+  revalidatePath('/petugas/dashboard');
 
   return { success: true };
 }
@@ -350,31 +487,22 @@ export async function confirmTicketResolutionAction(payload: {
  */
 export async function reopenTicketAction(payload: {
   ticketId: number | string;
-  reason: string;
+  alasan: string;
 }) {
+  const sanitizedAlasan = escapeHtml(payload.alasan?.trim() || 'Aspirasi dilaporkan belum tuntas oleh mahasiswa.');
   const user = await getServerSessionUser();
-  const cleanReason = payload.reason?.trim() || '';
 
-  if (!cleanReason) {
-    return { success: false, error: 'Alasan belum selesai wajib diisi.' };
-  }
-
-  const sanitizedReason = escapeHtml(cleanReason);
+  const historyItem: TicketHistoryItem = {
+    status: 'Diproses',
+    waktu: new Date().toISOString(),
+    catatan: `Laporan Dibuka Kembali: ${sanitizedAlasan}`,
+    petugas: user?.nama || 'Mahasiswa',
+  };
 
   const currentTicket = serverTicketCache.find(
     (t) => t.id === Number(payload.ticketId) || t.nomor_tiket === payload.ticketId
   );
-
-  const reopenHistoryItem: TicketHistoryItem = {
-    status: 'Diproses',
-    waktu: new Date().toISOString(),
-    catatan: `[Laporan Dibuka Kembali oleh Pelapor]: ${sanitizedReason}`,
-    petugas: user?.nama || 'Pelapor Mahasiswa',
-  };
-
-  const updatedHistory = currentTicket
-    ? [...(currentTicket.riwayat || []), reopenHistoryItem]
-    : [reopenHistoryItem];
+  const updatedHistory = currentTicket ? [...(currentTicket.riwayat || []), historyItem] : [historyItem];
 
   try {
     const supabase = await createClient();
@@ -397,6 +525,7 @@ export async function reopenTicketAction(payload: {
 
   revalidatePath('/dashboard');
   revalidatePath('/aspirasi/riwayat');
+  revalidatePath('/petugas/dashboard');
   revalidatePath('/petugas/kelola');
 
   return { success: true, ticket: currentTicket };
@@ -424,25 +553,8 @@ export async function getFilteredTicketsAction(filter?: {
     }
 
     const { data, error } = await q;
-    if (!error && data && data.length > 0) {
-      result = data.map((row: any) => ({
-        id: row.id,
-        nomor_tiket: row.nomor_tiket,
-        nama_pelapor: row.nama_pelapor,
-        nama_asli: row.nama_pelapor,
-        is_anonim: !!row.is_anonim,
-        kategori: row.kategori,
-        lokasi: row.lokasi || 'Lingkungan Kampus',
-        deskripsi: row.deskripsi,
-        status: row.status,
-        lampiran_foto: row.lampiran_foto || null,
-        catatan_penanganan: row.catatan_penanganan || '',
-        created_at: row.created_at,
-        riwayat: Array.isArray(row.riwayat) ? row.riwayat : [],
-        konfirmasi_selesai: !!row.konfirmasi_selesai,
-        rating: row.rating || null,
-        feedback: row.feedback || '',
-      }));
+    if (!error && data) {
+      result = data.map(mapRowToTicket);
       serverTicketCache = result;
     } else {
       result = [...serverTicketCache];
@@ -458,14 +570,9 @@ export async function getFilteredTicketsAction(filter?: {
       (t) =>
         t.nomor_tiket.toLowerCase().includes(search) ||
         t.nama_pelapor.toLowerCase().includes(search) ||
-        (t.lokasi && t.lokasi.toLowerCase().includes(search)) ||
-        t.deskripsi.toLowerCase().includes(search) ||
-        t.kategori.toLowerCase().includes(search)
+        t.kategori.toLowerCase().includes(search) ||
+        t.deskripsi.toLowerCase().includes(search)
     );
-  }
-
-  if (filter?.status && filter.status !== 'Semua') {
-    result = result.filter((t) => t.status === filter.status);
   }
 
   return { tickets: result };
@@ -486,27 +593,7 @@ export async function getTicketByCodeAction(nomorTiket: string): Promise<Ticket 
       .single();
 
     if (!error && data) {
-      const row = data as any;
-      const ticket: Ticket = {
-        id: row.id,
-        nomor_tiket: row.nomor_tiket,
-        nama_pelapor: row.nama_pelapor,
-        nama_asli: row.nama_pelapor,
-        is_anonim: !!row.is_anonim,
-        kategori: row.kategori,
-        lokasi: row.lokasi || 'Lingkungan Kampus',
-        deskripsi: row.deskripsi,
-        status: row.status,
-        lampiran_foto: row.lampiran_foto || null,
-        catatan_penanganan: row.catatan_penanganan || '',
-        bukti_penyelesaian: row.bukti_penyelesaian || null,
-        created_at: row.created_at,
-        riwayat: Array.isArray(row.riwayat) ? row.riwayat : [],
-        konfirmasi_selesai: !!row.konfirmasi_selesai,
-        rating: row.rating || null,
-        feedback: row.feedback || '',
-      };
-      return ticket;
+      return mapRowToTicket(data);
     }
   } catch (err) {
     console.warn('Supabase fetch single ticket fallback:', err);
